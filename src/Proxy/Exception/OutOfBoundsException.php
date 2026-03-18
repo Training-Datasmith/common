@@ -15,12 +15,10 @@ class OutOfBoundsException extends BaseOutOfBoundsException implements ProxyExce
 {
     /**
      * @param string $className
-     * @param string $idField
      * @psalm-param class-string $className
      *
-     * @return self
      */
-    public static function missingPrimaryKeyValue($className, $idField)
+    public static function missingPrimaryKeyValue($className, string $idField): self
     {
         return new self(sprintf('Missing value for primary key %s on %s', $idField, $className));
     }

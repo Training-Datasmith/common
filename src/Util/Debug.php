@@ -60,9 +60,7 @@ final class Debug
     {
         $html = ini_get('html_errors');
 
-        if ($html !== true) {
-            ini_set('html_errors', 'on');
-        }
+        ini_set('html_errors', 'on');
 
         if (extension_loaded('xdebug')) {
             ini_set('xdebug.var_display_max_depth', $maxDepth);
@@ -151,10 +149,8 @@ final class Debug
      *
      * @param object $var
      * @param int    $maxDepth
-     *
-     * @return mixed
      */
-    private static function fillReturnWithClassAttributes($var, stdClass $return, $maxDepth)
+    private static function fillReturnWithClassAttributes($var, stdClass $return, $maxDepth): stdClass
     {
         $clone = (array) $var;
 
@@ -175,10 +171,8 @@ final class Debug
      * Returns a string representation of an object.
      *
      * @param object $obj
-     *
-     * @return string
      */
-    public static function toString($obj)
+    public static function toString($obj): string
     {
         return method_exists($obj, '__toString') ? (string) $obj : get_class($obj) . '@' . spl_object_hash($obj);
     }

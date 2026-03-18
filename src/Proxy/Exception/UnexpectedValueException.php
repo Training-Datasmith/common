@@ -14,12 +14,7 @@ use function sprintf;
  */
 class UnexpectedValueException extends BaseUnexpectedValueException implements ProxyException
 {
-    /**
-     * @param string $proxyDirectory
-     *
-     * @return self
-     */
-    public static function proxyDirectoryNotWritable($proxyDirectory)
+    public static function proxyDirectoryNotWritable(string $proxyDirectory): self
     {
         return new self(sprintf('Your proxy directory "%s" must be writable', $proxyDirectory));
     }
@@ -27,17 +22,15 @@ class UnexpectedValueException extends BaseUnexpectedValueException implements P
     /**
      * @param string $className
      * @param string $methodName
-     * @param string $parameterName
      * @psalm-param class-string $className
      *
-     * @return self
      */
     public static function invalidParameterTypeHint(
         $className,
         $methodName,
-        $parameterName,
+        string $parameterName,
         ?Throwable $previous = null
-    ) {
+    ): self {
         return new self(
             sprintf(
                 'The type hint of parameter "%s" in method "%s" in class "%s" is invalid.',
@@ -52,12 +45,10 @@ class UnexpectedValueException extends BaseUnexpectedValueException implements P
 
     /**
      * @param string $className
-     * @param string $methodName
      * @psalm-param class-string $className
      *
-     * @return self
      */
-    public static function invalidReturnTypeHint($className, $methodName, ?Throwable $previous = null)
+    public static function invalidReturnTypeHint($className, string $methodName, ?Throwable $previous = null): self
     {
         return new self(
             sprintf(

@@ -76,10 +76,8 @@ class ClassUtils
      *
      * @param string $className
      * @psalm-param class-string $className
-     *
-     * @return ReflectionClass
      */
-    public static function newReflectionClass($className)
+    public static function newReflectionClass($className): \ReflectionClass
     {
         return new ReflectionClass(self::getRealClass($className));
     }
@@ -103,10 +101,9 @@ class ClassUtils
      * @param string $proxyNamespace
      * @psalm-param class-string $className
      *
-     * @return string
      * @psalm-return class-string
      */
-    public static function generateProxyClassName($className, $proxyNamespace)
+    public static function generateProxyClassName($className, $proxyNamespace): string
     {
         return rtrim($proxyNamespace, '\\') . '\\' . Proxy::MARKER . '\\' . ltrim($className, '\\');
     }

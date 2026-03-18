@@ -83,10 +83,8 @@ class ClassLoader
      * Sets the namespace separator used by classes in the namespace of this ClassLoader.
      *
      * @param string $sep The separator to use.
-     *
-     * @return void
      */
-    public function setNamespaceSeparator($sep)
+    public function setNamespaceSeparator($sep): void
     {
         $this->namespaceSeparator = $sep;
     }
@@ -105,10 +103,8 @@ class ClassLoader
      * Sets the base include path for all class files in the namespace of this ClassLoader.
      *
      * @param string|null $includePath
-     *
-     * @return void
      */
-    public function setIncludePath($includePath)
+    public function setIncludePath($includePath): void
     {
         $this->includePath = $includePath;
     }
@@ -127,10 +123,8 @@ class ClassLoader
      * Sets the file extension of class files in the namespace of this ClassLoader.
      *
      * @param string $fileExtension
-     *
-     * @return void
      */
-    public function setFileExtension($fileExtension)
+    public function setFileExtension($fileExtension): void
     {
         $this->fileExtension = $fileExtension;
     }
@@ -147,20 +141,16 @@ class ClassLoader
 
     /**
      * Registers this ClassLoader on the SPL autoload stack.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         spl_autoload_register([$this, 'loadClass']);
     }
 
     /**
      * Removes this ClassLoader from the SPL autoload stack.
-     *
-     * @return void
      */
-    public function unregister()
+    public function unregister(): void
     {
         spl_autoload_unregister([$this, 'loadClass']);
     }
@@ -251,7 +241,7 @@ class ClassLoader
      *
      * @return ClassLoader|null The <tt>ClassLoader</tt> for the class or NULL if no such <tt>ClassLoader</tt> exists.
      */
-    public static function getClassLoader($className)
+    public static function getClassLoader($className): ?\Doctrine\Common\ClassLoader
     {
         foreach (spl_autoload_functions() as $loader) {
             if (! is_array($loader)) {
@@ -272,11 +262,9 @@ class ClassLoader
      * Checks whether a given type exists
      *
      * @param string $type
-     * @param bool   $autoload
      *
-     * @return bool
      */
-    private static function typeExists($type, $autoload = false)
+    private static function typeExists($type, bool $autoload = false): bool
     {
         return class_exists($type, $autoload)
             || interface_exists($type, $autoload)

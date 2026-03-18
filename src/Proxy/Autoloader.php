@@ -32,16 +32,14 @@ class Autoloader
      * 2. Remove namespace separators from remaining class name.
      * 3. Return PHP filename from proxy-dir with the result from 2.
      *
-     * @param string $proxyDir
      * @param string $proxyNamespace
      * @param string $className
      * @psalm-param class-string $className
      *
-     * @return string
      *
      * @throws InvalidArgumentException
      */
-    public static function resolveFile($proxyDir, $proxyNamespace, $className)
+    public static function resolveFile(string $proxyDir, $proxyNamespace, $className): string
     {
         if (strpos($className, $proxyNamespace) !== 0) {
             throw InvalidArgumentException::notProxyClass($className, $proxyNamespace);
@@ -75,7 +73,7 @@ class Autoloader
             throw InvalidArgumentException::invalidClassNotFoundCallback($notFoundCallback);
         }
 
-        $autoloader = static function ($className) use ($proxyDir, $proxyNamespace, $notFoundCallback) {
+        $autoloader = static function ($className) use ($proxyDir, $proxyNamespace, $notFoundCallback): void {
             if ($proxyNamespace === '') {
                 return;
             }
