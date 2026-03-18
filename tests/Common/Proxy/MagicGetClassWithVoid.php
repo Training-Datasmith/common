@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 use BadMethodCallException;
@@ -12,7 +14,7 @@ class MagicGetClassWithVoid
     /**
      * @throws BadMethodCallException
      */
-    public function __get(string $name) : void
+    public function __get(string $name): void
     {
         return;
     }

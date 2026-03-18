@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 use BadMethodCallException;
@@ -18,7 +20,7 @@ class MagicIssetClassWithBoolean
     /**
      * @throws BadMethodCallException
      */
-    public function __isset(string $name) : bool
+    public function __isset(string $name): bool
     {
         if ($name === 'test') {
             return true;

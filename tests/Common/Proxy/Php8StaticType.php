@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 class Php8StaticType
 {
-    public function foo(mixed $bar) : static
+    public function foo(mixed $bar): static
     {
         return $this;
     }
 
-	public function fooNull(mixed $bar) : ?static
-	{
-		return $this;
-	}
+    public function fooNull(mixed $bar): ?static
+    {
+        return $this;
+    }
 }

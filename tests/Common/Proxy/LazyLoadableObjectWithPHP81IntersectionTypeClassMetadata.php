@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
+
+use function array_keys;
 
 use BadMethodCallException;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use ReflectionClass;
-use function array_keys;
 
 class LazyLoadableObjectWithPHP81IntersectionTypeClassMetadata implements ClassMetadata
 {

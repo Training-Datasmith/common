@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 /**
@@ -16,7 +18,7 @@ class MagicWakeupClassTypehinted
     /** @var string */
     public $wakeupValue = 'defaultValue';
 
-    public function __wakeup() : void
+    public function __wakeup(): void
     {
         $this->wakeupValue = 'newWakeupValue';
     }

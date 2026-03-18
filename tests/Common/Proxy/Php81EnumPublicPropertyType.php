@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
-enum YesOrNo : int {
+enum YesOrNo: int
+{
     case YES = 1;
     case NO = 0;
 }

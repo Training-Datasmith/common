@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 /**
@@ -17,7 +19,7 @@ class IterableTypeHintClass
     /**
      * @return iterable<mixed>
      */
-    public function returnType() : iterable
+    public function returnType(): iterable
     {
         return [];
     }

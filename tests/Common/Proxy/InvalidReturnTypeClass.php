@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 /**
@@ -10,7 +12,7 @@ class InvalidReturnTypeClass
     /**
      * @return InvalidReturnType (non existing class return type)
      */
-    public function invalidReturnTypeMethod() : InvalidReturnType
+    public function invalidReturnTypeMethod(): InvalidReturnType
     {
     }
 }

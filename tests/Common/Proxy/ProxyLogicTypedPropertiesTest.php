@@ -1,24 +1,32 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
+
+use function call_user_func_array;
+use function class_exists;
 
 use Closure;
 use Doctrine\Common\Proxy\Exception\UnexpectedValueException;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\Common\Proxy\ProxyGenerator;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+
+use function func_get_args;
+use function get_class;
+use function method_exists;
+
 use PHPUnit\Framework\Error\Notice;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionProperty;
-use stdClass;
-use function call_user_func_array;
-use function class_exists;
-use function func_get_args;
-use function get_class;
-use function method_exists;
+
 use function serialize;
+
+use stdClass;
+
 use function unserialize;
 
 /**
@@ -51,7 +59,7 @@ class ProxyLogicTypedPropertiesTest extends TestCase
     /**
      * {@inheritDoc}
      */
-    public function setUp() : void
+    public function setUp(): void
     {
         $loader                           = $this->proxyLoader      = $this->getMockBuilder(stdClass::class)->setMethods(['load'])->getMock();
         $this->initializerCallbackMock    = $this->getMockBuilder(stdClass::class)->setMethods(['__invoke'])->getMock();
@@ -213,7 +221,7 @@ class ProxyLogicTypedPropertiesTest extends TestCase
             $this->expectException(Notice::class);
             $this->expectExceptionMessage('Undefined property: ' . $class . '::$non_existing_property');
         }
-        
+
         $this->lazyObject->non_existing_property;
     }
 

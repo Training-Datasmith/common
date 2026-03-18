@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 use Doctrine\Common\Proxy\AbstractProxyFactory;
@@ -10,11 +12,13 @@ use Doctrine\Common\Proxy\ProxyGenerator;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\ClassMetadataFactory;
 use Doctrine\Tests\DoctrineTestCase;
+
+use function get_class;
+
 use OutOfBoundsException;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
-use function get_class;
-use function interface_exists;
+
 use function sys_get_temp_dir;
 
 class AbstractProxyFactoryTest extends DoctrineTestCase
@@ -24,7 +28,7 @@ class AbstractProxyFactoryTest extends DoctrineTestCase
      *
      * @psalm-return array{mixed, mixed}
      */
-    public function dataAutoGenerateValues() : array
+    public function dataAutoGenerateValues(): array
     {
         return [
             [0, 0],
@@ -44,7 +48,7 @@ class AbstractProxyFactoryTest extends DoctrineTestCase
      *
      * @dataProvider dataAutoGenerateValues
      */
-    public function testNoExceptionIsThrownForValidIntegerAutoGenerateValues($autoGenerate, int $expected) : void
+    public function testNoExceptionIsThrownForValidIntegerAutoGenerateValues($autoGenerate, int $expected): void
     {
         $proxyGenerator  = $this->createMock(ProxyGenerator::class);
         $metadataFactory = $this->createMock(ClassMetadataFactory::class);
@@ -61,7 +65,7 @@ class AbstractProxyFactoryTest extends DoctrineTestCase
         self::assertSame($expected, $property->getValue($proxyFactory));
     }
 
-    public function testInvalidAutoGenerateValueThrowsException() : void
+    public function testInvalidAutoGenerateValueThrowsException(): void
     {
         $proxyGenerator  = $this->createMock(ProxyGenerator::class);
         $metadataFactory = $this->createMock(ClassMetadataFactory::class);
@@ -217,7 +221,7 @@ class AbstractProxyFactoryTest extends DoctrineTestCase
         $proxyFactory->getProxy('Class', []);
     }
 
-    public function testGetProxyFileWhenProxyDoesNotExist() : void
+    public function testGetProxyFileWhenProxyDoesNotExist(): void
     {
         $proxyFile = tempnam(sys_get_temp_dir(), 'proxy');
         unlink($proxyFile);
@@ -245,7 +249,7 @@ class AbstractProxyFactoryTest extends DoctrineTestCase
         $proxyGenerator
             ->expects($this->once())
             ->method('generateProxyClass')
-            ->willReturnCallback(function() use ($proxyFile) {
+            ->willReturnCallback(function () use ($proxyFile) {
                 file_put_contents($proxyFile, '<?php class MyObject1 {} ');
             });
 
@@ -264,7 +268,7 @@ class AbstractProxyFactoryTest extends DoctrineTestCase
         self::assertInstanceOf('MyObject1', $generatedProxy);
     }
 
-    public function testGetProxyFileWhenProxyIsOlderThanSource() : void
+    public function testGetProxyFileWhenProxyIsOlderThanSource(): void
     {
         $proxyFile = tempnam(sys_get_temp_dir(), 'proxy');
         file_put_contents($proxyFile, '<?php class MyObject2 {} ');
@@ -321,7 +325,7 @@ class AbstractProxyFactoryTest extends DoctrineTestCase
         self::assertInstanceOf('MyObject2', $generatedProxy);
     }
 
-    public function testGetProxyFileWhenProxyIsNewerThanSource() : void
+    public function testGetProxyFileWhenProxyIsNewerThanSource(): void
     {
         $sourceFile = tempnam(sys_get_temp_dir(), 'source');
         sleep(1);

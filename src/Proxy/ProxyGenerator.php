@@ -1,19 +1,8 @@
 <?php
 
-namespace Doctrine\Common\Proxy;
+declare(strict_types=1);
 
-use BackedEnum;
-use Doctrine\Common\Proxy\Exception\InvalidArgumentException;
-use Doctrine\Common\Proxy\Exception\UnexpectedValueException;
-use Doctrine\Common\Util\ClassUtils;
-use Doctrine\Persistence\Mapping\ClassMetadata;
-use ReflectionIntersectionType;
-use ReflectionMethod;
-use ReflectionNamedType;
-use ReflectionParameter;
-use ReflectionProperty;
-use ReflectionType;
-use ReflectionUnionType;
+namespace Doctrine\Common\Proxy;
 
 use function array_combine;
 use function array_diff;
@@ -22,11 +11,23 @@ use function array_map;
 use function array_slice;
 use function array_unique;
 use function assert;
+
+use BackedEnum;
+
 use function bin2hex;
 use function call_user_func;
 use function chmod;
 use function class_exists;
+
+use const DIRECTORY_SEPARATOR;
+
 use function dirname;
+
+use Doctrine\Common\Proxy\Exception\InvalidArgumentException;
+use Doctrine\Common\Proxy\Exception\UnexpectedValueException;
+use Doctrine\Common\Util\ClassUtils;
+use Doctrine\Persistence\Mapping\ClassMetadata;
+
 use function explode;
 use function file;
 use function file_put_contents;
@@ -43,11 +44,26 @@ use function lcfirst;
 use function ltrim;
 use function method_exists;
 use function mkdir;
+
+use const PHP_VERSION_ID;
+
 use function preg_match;
 use function preg_match_all;
 use function preg_replace;
 use function preg_split;
+
+use const PREG_SPLIT_DELIM_CAPTURE;
+
 use function random_bytes;
+
+use ReflectionIntersectionType;
+use ReflectionMethod;
+use ReflectionNamedType;
+use ReflectionParameter;
+use ReflectionProperty;
+use ReflectionType;
+use ReflectionUnionType;
+
 use function rename;
 use function rtrim;
 use function sprintf;
@@ -56,13 +72,10 @@ use function strpos;
 use function strrev;
 use function strtolower;
 use function strtr;
+
 use function substr;
 use function trim;
 use function var_export;
-
-use const DIRECTORY_SEPARATOR;
-use const PHP_VERSION_ID;
-use const PREG_SPLIT_DELIM_CAPTURE;
 
 /**
  * This factory is used to generate proxy classes.

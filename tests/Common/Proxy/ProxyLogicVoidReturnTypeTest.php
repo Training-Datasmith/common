@@ -1,17 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
+
+use function call_user_func_array;
+use function class_exists;
 
 use Closure;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\Common\Proxy\ProxyGenerator;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+
+use function func_get_args;
+
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use stdClass;
-use function call_user_func_array;
-use function class_exists;
-use function func_get_args;
 
 /**
  * Test that identifier getter does not cause lazy loading. These tests make assumptions about the structure of LazyLoadableObjectWithTypehints
@@ -33,7 +38,7 @@ class ProxyLogicVoidReturnTypeTest extends TestCase
     /**
      * {@inheritDoc}
      */
-    public function setUp() : void
+    public function setUp(): void
     {
         $this->proxyLoader                = $loader      = $this->getMockBuilder(stdClass::class)->setMethods(['load'])->getMock();
         $this->initializerCallbackMock    = $this->getMockBuilder(stdClass::class)->setMethods(['__invoke'])->getMock();

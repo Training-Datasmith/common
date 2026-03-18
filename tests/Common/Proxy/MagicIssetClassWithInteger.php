@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 if (PHP_VERSION_ID < 80000) {
     eval(<<<'BROKEN_CODE'
 namespace Doctrine\Tests\Common\Proxy;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 use BadMethodCallException;
@@ -18,7 +20,7 @@ class MagicGetClassWithScalarType
     /**
      * @throws BadMethodCallException
      */
-    public function __get(string $name) : string
+    public function __get(string $name): string
     {
         if ($name === 'test') {
             return 'test';

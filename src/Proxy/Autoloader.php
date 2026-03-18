@@ -1,11 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Common\Proxy;
 
+use function call_user_func;
+
 use Closure;
+
+use const DIRECTORY_SEPARATOR;
+
 use Doctrine\Common\Proxy\Exception\InvalidArgumentException;
 
-use function call_user_func;
 use function file_exists;
 use function is_callable;
 use function ltrim;
@@ -13,9 +19,8 @@ use function spl_autoload_register;
 use function str_replace;
 use function strlen;
 use function strpos;
-use function substr;
 
-use const DIRECTORY_SEPARATOR;
+use function substr;
 
 /**
  * Special Autoloader for Proxy classes, which are not PSR-0 compliant.

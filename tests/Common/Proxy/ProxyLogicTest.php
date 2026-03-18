@@ -1,25 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
+
+use function assert;
+use function call_user_func_array;
+use function class_exists;
 
 use Closure;
 use Doctrine\Common\Proxy\Exception\UnexpectedValueException;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\Common\Proxy\ProxyGenerator;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+
+use function func_get_args;
+use function get_class;
+use function method_exists;
+
 use PHPUnit\Framework\Error\Notice;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionProperty;
-use stdClass;
-use function assert;
-use function call_user_func_array;
-use function class_exists;
-use function func_get_args;
-use function get_class;
-use function method_exists;
+
 use function serialize;
+
+use stdClass;
+
 use function unserialize;
 
 /**
@@ -48,7 +56,7 @@ class ProxyLogicTest extends TestCase
     /**
      * {@inheritDoc}
      */
-    public function setUp() : void
+    public function setUp(): void
     {
         $loader                           = $this->proxyLoader      = $this->createMock(ProxyLoader::class);
         $this->initializerCallbackMock    = $this->getMockBuilder(stdClass::class)->setMethods(['__invoke'])->getMock();
@@ -759,7 +767,7 @@ class ProxyLogicTest extends TestCase
 
 interface Cloner
 {
-    public function cb() : ?callable;
+    public function cb(): ?callable;
 }
 
 interface ProxyLoader

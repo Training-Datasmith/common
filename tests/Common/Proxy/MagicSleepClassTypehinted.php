@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 /**
@@ -22,7 +24,7 @@ class MagicSleepClassTypehinted
     /**
      * @return string[]
      */
-    public function __sleep() : array
+    public function __sleep(): array
     {
         return ['serializedField'];
     }

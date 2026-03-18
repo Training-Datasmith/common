@@ -1,15 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
+
+use function class_exists;
+
+use const DIRECTORY_SEPARATOR;
 
 use Doctrine\Common\Proxy\Autoloader;
 use Doctrine\Common\Proxy\Exception\InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
-use stdClass;
-use const DIRECTORY_SEPARATOR;
-use function class_exists;
+
 use function file_exists;
 use function file_put_contents;
+
+use PHPUnit\Framework\TestCase;
+use stdClass;
+
 use function sys_get_temp_dir;
 use function unlink;
 

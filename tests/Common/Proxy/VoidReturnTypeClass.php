@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 /**
@@ -7,7 +9,7 @@ namespace Doctrine\Tests\Common\Proxy;
  */
 class VoidReturnTypeClass
 {
-    public function returnsVoid() : void
+    public function returnsVoid(): void
     {
     }
 }

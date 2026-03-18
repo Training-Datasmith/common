@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 /**
@@ -10,12 +12,12 @@ class LazyLoadableObjectWithVoid
     /** @var int */
     public $value = 0;
 
-    public function incrementingAndReturningVoid() : void
+    public function incrementingAndReturningVoid(): void
     {
         $this->value++;
     }
 
-    public function addingAndReturningVoid(int $i) : void
+    public function addingAndReturningVoid(int $i): void
     {
         $this->value += $i;
     }

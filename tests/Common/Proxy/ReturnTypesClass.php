@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 use ArrayIterator;
@@ -11,12 +13,12 @@ use stdClass;
  */
 class ReturnTypesClass extends stdClass
 {
-    public function returnsClass() : stdClass
+    public function returnsClass(): stdClass
     {
         return new stdClass();
     }
 
-    public function returnsScalar() : int
+    public function returnsScalar(): int
     {
         return 42;
     }
@@ -24,27 +26,27 @@ class ReturnTypesClass extends stdClass
     /**
      * @return mixed[]
      */
-    public function returnsArray() : array
+    public function returnsArray(): array
     {
         return [];
     }
 
-    public function returnsCallable() : callable
+    public function returnsCallable(): callable
     {
         return 'intval';
     }
 
-    public function returnsSelf() : self
+    public function returnsSelf(): self
     {
         return $this;
     }
 
-    public function returnsParent() : parent
+    public function returnsParent(): parent
     {
         return $this;
     }
 
-    public function returnsInterface() : Countable
+    public function returnsInterface(): Countable
     {
         return new ArrayIterator([]);
     }

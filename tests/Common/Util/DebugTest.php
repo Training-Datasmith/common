@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Util;
 
 use ArrayIterator;
@@ -9,12 +11,15 @@ use DateTimeImmutable;
 use DateTimeZone;
 use Doctrine\Common\Util\Debug;
 use Doctrine\Tests\DoctrineTestCase;
-use stdClass;
 
 use function ob_end_clean;
+
 use function ob_get_contents;
 use function ob_start;
 use function print_r;
+
+use stdClass;
+
 use function strpos;
 use function substr;
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 use stdClass as A;
@@ -15,12 +17,12 @@ class LazyLoadableObjectWithNullableTypehints
     /** @var A */
     private $identifierFieldReturnClassOneLetterNullableWithSpace;
 
-    public function getIdentifierFieldReturnClassOneLetterNullable() : ?A
+    public function getIdentifierFieldReturnClassOneLetterNullable(): ?A
     {
         return $this->identifierFieldReturnClassOneLetterNullable;
     }
 
-    public function getIdentifierFieldReturnClassOneLetterNullableWithSpace() : ?A
+    public function getIdentifierFieldReturnClassOneLetterNullableWithSpace(): ?A
     {
         return $this->identifierFieldReturnClassOneLetterNullableWithSpace;
     }

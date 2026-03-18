@@ -1,23 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
+
+use function class_exists;
+use function count;
 
 use Doctrine\Common\Proxy\Exception\InvalidArgumentException;
 use Doctrine\Common\Proxy\Exception\UnexpectedValueException;
 use Doctrine\Common\Proxy\ProxyGenerator;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+
+use function file_get_contents;
+use function is_subclass_of;
+
+use const PHP_VERSION_ID;
+
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
-use function class_exists;
-use function count;
-use function file_get_contents;
-use function is_subclass_of;
-use function substr_count;
 
-use const PHP_VERSION_ID;
+use function substr_count;
 
 /**
  * Test the proxy generator. Its work is generating on-the-fly subclasses of a given model, which implement the Proxy
@@ -37,7 +43,7 @@ class ProxyGeneratorTest extends TestCase
     /**
      * {@inheritDoc}
      */
-    protected function setUp() : void
+    protected function setUp(): void
     {
         $this->metadata       = new LazyLoadableObjectClassMetadata();
         $this->proxyGenerator = new ProxyGenerator(__DIR__ . '/generated', __NAMESPACE__ . 'Proxy');
@@ -424,7 +430,7 @@ class ProxyGeneratorTest extends TestCase
     {
         $className = Php8MagicCloneClass::class;
 
-        if ( ! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\Php8MagicCloneClass', false)) {
+        if (! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\Php8MagicCloneClass', false)) {
             $metadata = $this->createClassMetadata($className, ['id']);
 
             $proxyGenerator = new ProxyGenerator(__DIR__ . '/generated', __NAMESPACE__ . 'Proxy');
@@ -444,7 +450,7 @@ class ProxyGeneratorTest extends TestCase
     {
         $className = Php8UnionTypes::class;
 
-        if ( ! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\Php8UnionTypes', false)) {
+        if (! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\Php8UnionTypes', false)) {
             $metadata = $this->createClassMetadata($className, ['id']);
 
             $proxyGenerator = new ProxyGenerator(__DIR__ . '/generated', __NAMESPACE__ . 'Proxy');
@@ -474,7 +480,7 @@ class ProxyGeneratorTest extends TestCase
     {
         $className = Php8MixedType::class;
 
-        if ( ! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\Php8MixedType', false)) {
+        if (! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\Php8MixedType', false)) {
             $metadata = $this->createClassMetadata($className, ['id']);
 
             $proxyGenerator = new ProxyGenerator(__DIR__ . '/generated', __NAMESPACE__ . 'Proxy');
@@ -494,7 +500,7 @@ class ProxyGeneratorTest extends TestCase
     {
         $className = Php8StaticType::class;
 
-        if ( ! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\Php8StaticType', false)) {
+        if (! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\Php8StaticType', false)) {
             $metadata = $this->createClassMetadata($className, ['id']);
 
             $proxyGenerator = new ProxyGenerator(__DIR__ . '/generated', __NAMESPACE__ . 'Proxy');
@@ -519,7 +525,7 @@ class ProxyGeneratorTest extends TestCase
     {
         $className = PHP81IntersectionTypes::class;
 
-        if ( ! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\PHP81IntersectionTypes', false)) {
+        if (! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\PHP81IntersectionTypes', false)) {
             $metadata = $this->createClassMetadata($className, ['id']);
 
             $proxyGenerator = new ProxyGenerator(__DIR__ . '/generated', __NAMESPACE__ . 'Proxy');
@@ -539,7 +545,7 @@ class ProxyGeneratorTest extends TestCase
     {
         $className = PHP81NeverType::class;
 
-        if ( ! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\PHP81NeverType', false)) {
+        if (! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\PHP81NeverType', false)) {
             $metadata = $this->createClassMetadata($className, ['id']);
 
             $proxyGenerator = new ProxyGenerator(__DIR__ . '/generated', __NAMESPACE__ . 'Proxy');
@@ -565,11 +571,11 @@ class ProxyGeneratorTest extends TestCase
     /**
      * @requires PHP >= 8.1.0
      */
-    public function testEnumDefaultInPublicProperty() : void
+    public function testEnumDefaultInPublicProperty(): void
     {
         $className = Php81EnumPublicPropertyType::class;
 
-        if ( ! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\Php81EnumPublicPropertyType', false)) {
+        if (! class_exists('Doctrine\Tests\Common\ProxyProxy\__CG__\Php81EnumPublicPropertyType', false)) {
             $metadata = $this->createClassMetadata($className, ['id']);
 
             $metadata->method('hasField')->will($this->returnValue(true));

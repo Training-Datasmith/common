@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ClassLoaderTest;
 
 use function spl_autoload_register;

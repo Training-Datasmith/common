@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
 
 use stdClass;
@@ -33,17 +35,17 @@ class NullableTypeHintsClass
     {
     }
 
-    public function returnsNullableInt() : ?int
+    public function returnsNullableInt(): ?int
     {
         return null;
     }
 
-    public function returnsNullableObject() : ?stdClass
+    public function returnsNullableObject(): ?stdClass
     {
         return null;
     }
 
-    public function returnsNullableSelf() : ?self
+    public function returnsNullableSelf(): ?self
     {
         return null;
     }

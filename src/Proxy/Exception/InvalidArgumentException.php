@@ -1,12 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Common\Proxy\Exception;
 
 use Doctrine\Persistence\Proxy;
-use InvalidArgumentException as BaseInvalidArgumentException;
 
 use function get_class;
+
 use function gettype;
+
+use InvalidArgumentException as BaseInvalidArgumentException;
+
 use function is_object;
 use function sprintf;
 

@@ -1,16 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Common\Util;
+
+use function array_keys;
 
 use ArrayIterator;
 use ArrayObject;
+
+use function count;
+
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Persistence\Proxy;
-use stdClass;
 
-use function array_keys;
-use function count;
+use Doctrine\Persistence\Proxy;
+
 use function end;
 use function explode;
 use function extension_loaded;
@@ -25,6 +30,9 @@ use function ob_end_clean;
 use function ob_get_contents;
 use function ob_start;
 use function spl_object_hash;
+
+use stdClass;
+
 use function strip_tags;
 use function var_dump;
 

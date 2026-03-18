@@ -1,8 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Common;
 
 use function class_exists;
+
+use const DIRECTORY_SEPARATOR;
+use const E_USER_DEPRECATED;
+
 use function interface_exists;
 use function is_array;
 use function is_file;
@@ -13,11 +19,9 @@ use function spl_autoload_unregister;
 use function str_replace;
 use function stream_resolve_include_path;
 use function strpos;
+
 use function trait_exists;
 use function trigger_error;
-
-use const DIRECTORY_SEPARATOR;
-use const E_USER_DEPRECATED;
 
 @trigger_error(ClassLoader::class . ' is deprecated.', E_USER_DEPRECATED);
 

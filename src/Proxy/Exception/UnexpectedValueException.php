@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Common\Proxy\Exception;
 
-use Throwable;
-use UnexpectedValueException as BaseUnexpectedValueException;
-
 use function sprintf;
+
+use Throwable;
+
+use UnexpectedValueException as BaseUnexpectedValueException;
 
 /**
  * Proxy Unexpected Value Exception.

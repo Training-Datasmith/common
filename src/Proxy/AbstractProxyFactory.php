@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Common\Proxy;
+
+use function class_exists;
 
 use Doctrine\Common\Proxy\Exception\InvalidArgumentException;
 use Doctrine\Common\Proxy\Exception\OutOfBoundsException;
 use Doctrine\Common\Util\ClassUtils;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+
 use Doctrine\Persistence\Mapping\ClassMetadataFactory;
 
-use function class_exists;
 use function file_exists;
 use function filemtime;
 use function in_array;

@@ -1,13 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Common\Util;
 
 use Doctrine\Persistence\Proxy;
-use ReflectionClass;
 
 use function get_class;
+
 use function get_parent_class;
 use function ltrim;
+
+use ReflectionClass;
+
 use function rtrim;
 use function strrpos;
 use function substr;

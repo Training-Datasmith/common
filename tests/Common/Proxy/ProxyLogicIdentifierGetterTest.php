@@ -1,14 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Doctrine\Tests\Common\Proxy;
+
+use function class_exists;
 
 use Doctrine\Common\Proxy\ProxyGenerator;
 use Doctrine\Persistence\Mapping\ClassMetadata;
-use PHPUnit\Framework\TestCase;
-use stdClass;
-use function class_exists;
 
 use const PHP_VERSION_ID;
+
+use PHPUnit\Framework\TestCase;
+
+use stdClass;
 
 /**
  * Test that identifier getter does not cause lazy loading.
@@ -80,7 +85,7 @@ class ProxyLogicIdentifierGetterTest extends TestCase
         }
 
         if (PHP_VERSION_ID >= 80100) {
-            $data[] = [new LazyLoadableObjectWithPHP81IntersectionTypeClassMetadata(), 'identifierFieldIntersectionType', new class extends \stdClass implements \Stringable {
+            $data[] = [new LazyLoadableObjectWithPHP81IntersectionTypeClassMetadata(), 'identifierFieldIntersectionType', new class () extends \stdClass implements \Stringable {
                 public function __toString(): string
                 {
                     return '';
@@ -89,7 +94,7 @@ class ProxyLogicIdentifierGetterTest extends TestCase
         }
 
         if (PHP_VERSION_ID >= 80200) {
-            $data[] = [new LazyLoadableObjectWithPHP82UnionAndIntersectionTypeClassMetadata(), 'identifierFieldUnionAndIntersectionType', new class extends \stdClass implements \Stringable {
+            $data[] = [new LazyLoadableObjectWithPHP82UnionAndIntersectionTypeClassMetadata(), 'identifierFieldUnionAndIntersectionType', new class () extends \stdClass implements \Stringable {
                 public function __toString(): string
                 {
                     return '';
