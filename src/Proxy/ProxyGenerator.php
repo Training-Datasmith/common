@@ -294,7 +294,7 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
      *
      * @throws InvalidArgumentException
      */
-    public function setPlaceholder($name, $placeholder): void
+    protected function setPlaceholder($name, $placeholder): void
     {
         if (! is_string($placeholder) && ! is_callable($placeholder)) {
             throw InvalidArgumentException::invalidPlaceholder($name);
