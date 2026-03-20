@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Doctrine\Common;
 
 /**
@@ -24,5 +23,5 @@ interface Comparable
      *
      * @return int
      */
-    public function compareTo($other);
+    public function compare_to($other);
 }

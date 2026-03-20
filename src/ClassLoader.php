@@ -1,14 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Doctrine\Common;
 
 use function class_exists;
-
 use const DIRECTORY_SEPARATOR;
 use const E_USER_DEPRECATED;
-
 use function interface_exists;
 use function is_array;
 use function is_file;
@@ -19,12 +16,9 @@ use function spl_autoload_unregister;
 use function str_replace;
 use function stream_resolve_include_path;
 use function strpos;
-
 use function trait_exists;
 use function trigger_error;
-
-@trigger_error(ClassLoader::class . ' is deprecated.', E_USER_DEPRECATED);
-
+@trigger_error(Class_Loader::class . ' is deprecated.', E_USER_DEPRECATED);
 /**
  * A <tt>ClassLoader</tt> is an autoloader for class files that can be
  * installed on the SPL autoload stack. It is a class loader that either loads only classes
@@ -36,36 +30,32 @@ use function trigger_error;
  *
  * @deprecated The ClassLoader is deprecated and will be removed in version 4.0 of doctrine/common.
  */
-class ClassLoader
+class Class_Loader
 {
     /**
      * PHP file extension.
      *
      * @var string
      */
-    protected $fileExtension = '.php';
-
+    protected $file_extension = '.php';
     /**
      * Current namespace.
      *
      * @var string|null
      */
     protected $namespace;
-
     /**
      * Current include path.
      *
      * @var string|null
      */
-    protected $includePath;
-
+    protected $include_path;
     /**
      * PHP namespace separator.
      *
      * @var string
      */
-    protected $namespaceSeparator = '\\';
-
+    protected $namespace_separator = '\\';
     /**
      * Creates a new <tt>ClassLoader</tt> that loads classes of the
      * specified namespace from the specified include path.
@@ -77,72 +67,65 @@ class ClassLoader
      * @param string|null $ns          The namespace of the classes to load.
      * @param string|null $includePath The base include path to use.
      */
-    public function __construct($ns = null, $includePath = null)
+    public function __construct($ns = null, $include_path = null)
     {
-        $this->namespace   = $ns;
-        $this->includePath = $includePath;
+        $this->namespace = $ns;
+        $this->include_path = $include_path;
     }
-
     /**
      * Sets the namespace separator used by classes in the namespace of this ClassLoader.
      *
      * @param string $sep The separator to use.
      */
-    public function setNamespaceSeparator($sep): void
+    public function set_namespace_separator($sep): void
     {
-        $this->namespaceSeparator = $sep;
+        $this->namespace_separator = $sep;
     }
-
     /**
      * Gets the namespace separator used by classes in the namespace of this ClassLoader.
      *
      * @return string
      */
-    public function getNamespaceSeparator()
+    public function get_namespace_separator()
     {
-        return $this->namespaceSeparator;
+        return $this->namespace_separator;
     }
-
     /**
      * Sets the base include path for all class files in the namespace of this ClassLoader.
      *
      * @param string|null $includePath
      */
-    public function setIncludePath($includePath): void
+    public function set_include_path($include_path): void
     {
-        $this->includePath = $includePath;
+        $this->include_path = $include_path;
     }
-
     /**
      * Gets the base include path for all class files in the namespace of this ClassLoader.
      *
      * @return string|null
      */
-    public function getIncludePath()
+    public function get_include_path()
     {
-        return $this->includePath;
+        return $this->include_path;
     }
-
     /**
      * Sets the file extension of class files in the namespace of this ClassLoader.
      *
      * @param string $fileExtension
      */
-    public function setFileExtension($fileExtension): void
+    public function set_file_extension($file_extension): void
     {
-        $this->fileExtension = $fileExtension;
+        $this->file_extension = $file_extension;
     }
-
     /**
      * Gets the file extension of class files in the namespace of this ClassLoader.
      *
      * @return string
      */
-    public function getFileExtension()
+    public function get_file_extension()
     {
-        return $this->fileExtension;
+        return $this->file_extension;
     }
-
     /**
      * Registers this ClassLoader on the SPL autoload stack.
      */
@@ -150,7 +133,6 @@ class ClassLoader
     {
         spl_autoload_register([$this, 'loadClass']);
     }
-
     /**
      * Removes this ClassLoader from the SPL autoload stack.
      */
@@ -158,7 +140,6 @@ class ClassLoader
     {
         spl_autoload_unregister([$this, 'loadClass']);
     }
-
     /**
      * Loads the given class or interface.
      *
@@ -167,23 +148,17 @@ class ClassLoader
      *
      * @return bool TRUE if the class has been successfully loaded, FALSE otherwise.
      */
-    public function loadClass($className)
+    public function load_class($class_name)
     {
-        if (self::typeExists($className)) {
+        if (self::type_exists($class_name)) {
             return true;
         }
-
-        if (! $this->canLoadClass($className)) {
+        if (!$this->can_load_class($class_name)) {
             return false;
         }
-
-        require($this->includePath !== null ? $this->includePath . DIRECTORY_SEPARATOR : '')
-               . str_replace($this->namespaceSeparator, DIRECTORY_SEPARATOR, $className)
-               . $this->fileExtension;
-
-        return self::typeExists($className);
+        require ($this->include_path !== null ? $this->include_path . DIRECTORY_SEPARATOR : '') . str_replace($this->namespace_separator, DIRECTORY_SEPARATOR, $class_name) . $this->file_extension;
+        return self::type_exists($class_name);
     }
-
     /**
      * Asks this ClassLoader whether it can potentially load the class (file) with
      * the given name.
@@ -193,21 +168,17 @@ class ClassLoader
      *
      * @return bool TRUE if this ClassLoader can load the class, FALSE otherwise.
      */
-    public function canLoadClass($className)
+    public function can_load_class($class_name)
     {
-        if ($this->namespace !== null && strpos($className, $this->namespace . $this->namespaceSeparator) !== 0) {
+        if ($this->namespace !== null && strpos($class_name, $this->namespace . $this->namespace_separator) !== 0) {
             return false;
         }
-
-        $file = str_replace($this->namespaceSeparator, DIRECTORY_SEPARATOR, $className) . $this->fileExtension;
-
-        if ($this->includePath !== null) {
-            return is_file($this->includePath . DIRECTORY_SEPARATOR . $file);
+        $file = str_replace($this->namespace_separator, DIRECTORY_SEPARATOR, $class_name) . $this->file_extension;
+        if ($this->include_path !== null) {
+            return is_file($this->include_path . DIRECTORY_SEPARATOR . $file);
         }
-
         return stream_resolve_include_path($file) !== false;
     }
-
     /**
      * Checks whether a class with a given name exists. A class "exists" if it is either
      * already defined in the current request or if there is an autoloader on the SPL
@@ -231,11 +202,10 @@ class ClassLoader
      *
      * @return bool TRUE if the class exists as per the definition given above, FALSE otherwise.
      */
-    public static function classExists($className)
+    public static function class_exists($class_name)
     {
-        return self::typeExists($className, true);
+        return self::type_exists($class_name, true);
     }
-
     /**
      * Gets the <tt>ClassLoader</tt> from the SPL autoload stack that is responsible
      * for (and is able to load) the class with the given name.
@@ -245,33 +215,27 @@ class ClassLoader
      *
      * @return ClassLoader|null The <tt>ClassLoader</tt> for the class or NULL if no such <tt>ClassLoader</tt> exists.
      */
-    public static function getClassLoader($className): ?\Doctrine\Common\ClassLoader
+    public static function get_class_loader($class_name): ?\Doctrine\Common\Class_Loader
     {
         foreach (spl_autoload_functions() as $loader) {
-            if (! is_array($loader)) {
+            if (!is_array($loader)) {
                 continue;
             }
-
-            $classLoader = reset($loader);
-
-            if ($classLoader instanceof ClassLoader && $classLoader->canLoadClass($className)) {
-                return $classLoader;
+            $class_loader = reset($loader);
+            if ($class_loader instanceof Class_Loader && $class_loader->can_load_class($class_name)) {
+                return $class_loader;
             }
         }
-
         return null;
     }
-
     /**
      * Checks whether a given type exists
      *
      * @param string $type
      *
      */
-    private static function typeExists($type, bool $autoload = false): bool
+    private static function type_exists($type, bool $autoload = false): bool
     {
-        return class_exists($type, $autoload)
-            || interface_exists($type, $autoload)
-            || trait_exists($type, $autoload);
+        return class_exists($type, $autoload) || interface_exists($type, $autoload) || trait_exists($type, $autoload);
     }
 }

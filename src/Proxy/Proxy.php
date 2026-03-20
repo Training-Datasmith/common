@@ -1,12 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Doctrine\Common\Proxy;
 
 use Closure;
 use Doctrine\Persistence\Proxy as BaseProxy;
-
 /**
  * Interface for proxy classes.
  *
@@ -15,7 +13,7 @@ use Doctrine\Persistence\Proxy as BaseProxy;
  * @template T of object
  * @template-extends BaseProxy<T>
  */
-interface Proxy extends BaseProxy
+interface Proxy extends Base_Proxy
 {
     /**
      * Marks the proxy as initialized or not.
@@ -24,8 +22,7 @@ interface Proxy extends BaseProxy
      *
      * @return void
      */
-    public function __setInitialized($initialized);
-
+    public function __set_initialized($initialized);
     /**
      * Sets the initializer callback to be used when initializing the proxy. That
      * initializer should accept 3 parameters: $proxy, $method and $params. Those
@@ -34,8 +31,7 @@ interface Proxy extends BaseProxy
      *
      * @return void
      */
-    public function __setInitializer(?Closure $initializer = null);
-
+    public function __set_initializer(?Closure $initializer = null);
     /**
      * Retrieves the initializer callback used to initialize the proxy.
      *
@@ -43,16 +39,14 @@ interface Proxy extends BaseProxy
      *
      * @return Closure|null
      */
-    public function __getInitializer();
-
+    public function __get_initializer();
     /**
      * Sets the callback to be used when cloning the proxy. That initializer should accept
      * a single parameter, which is the cloned proxy instance itself.
      *
      * @return void
      */
-    public function __setCloner(?Closure $cloner = null);
-
+    public function __set_cloner(?Closure $cloner = null);
     /**
      * Retrieves the callback to be used when cloning the proxy.
      *
@@ -60,13 +54,12 @@ interface Proxy extends BaseProxy
      *
      * @return Closure|null
      */
-    public function __getCloner();
-
+    public function __get_cloner();
     /**
      * Retrieves the list of lazy loaded properties for a given proxy
      *
      * @return array<string, mixed> Keys are the property names, and values are the default values
      *                              for those properties.
      */
-    public function __getLazyProperties();
+    public function __get_lazy_properties();
 }

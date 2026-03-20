@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Doctrine\Common\Proxy\Exception;
 
 /**
@@ -9,6 +8,6 @@ namespace Doctrine\Common\Proxy\Exception;
  *
  * @deprecated The ProxyException interface is deprecated since doctrine/common 3.5.
  */
-interface ProxyException
+interface Proxy_Exception
 {
 }

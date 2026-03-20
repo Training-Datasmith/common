@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Doctrine\Common\Proxy;
 
 use function array_combine;
@@ -11,23 +10,17 @@ use function array_map;
 use function array_slice;
 use function array_unique;
 use function assert;
-
-use BackedEnum;
-
+use Backed_Enum;
 use function bin2hex;
 use function call_user_func;
 use function chmod;
 use function class_exists;
-
 use const DIRECTORY_SEPARATOR;
-
 use function dirname;
-
 use Doctrine\Common\Proxy\Exception\InvalidArgumentException;
 use Doctrine\Common\Proxy\Exception\UnexpectedValueException;
-use Doctrine\Common\Util\ClassUtils;
-use Doctrine\Persistence\Mapping\ClassMetadata;
-
+use Doctrine\Common\Util\Class_Utils;
+use Doctrine\Persistence\Mapping\Class_Metadata;
 use function explode;
 use function file;
 use function file_put_contents;
@@ -44,26 +37,20 @@ use function lcfirst;
 use function ltrim;
 use function method_exists;
 use function mkdir;
-
 use const PHP_VERSION_ID;
-
 use function preg_match;
 use function preg_match_all;
 use function preg_replace;
 use function preg_split;
-
 use const PREG_SPLIT_DELIM_CAPTURE;
-
 use function random_bytes;
-
 use ReflectionIntersectionType;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionProperty;
-use ReflectionType;
+use Reflection_Type;
 use ReflectionUnionType;
-
 use function rename;
 use function rtrim;
 use function sprintf;
@@ -72,61 +59,52 @@ use function strpos;
 use function strrev;
 use function strtolower;
 use function strtr;
-
 use function substr;
 use function trim;
 use function var_export;
-
 /**
  * This factory is used to generate proxy classes.
  * It builds proxies from given parameters, a template and class metadata.
  *
  * @deprecated The ProxyGenerator class is deprecated since doctrine/common 3.5.
  */
-class ProxyGenerator
+class Proxy_Generator
 {
     /**
      * Used to match very simple id methods that don't need
      * to be decorated since the identifier is known.
      */
     public const PATTERN_MATCH_ID_METHOD = <<<'EOT'
-((?(DEFINE)
-  (?<type>\\?[a-z_\x7f-\xff][\w\x7f-\xff]*(?:\\[a-z_\x7f-\xff][\w\x7f-\xff]*)*)
-  (?<intersection_type>(?&type)\s*&\s*(?&type))
-  (?<union_type>(?:(?:\(\s*(?&intersection_type)\s*\))|(?&type))(?:\s*\|\s*(?:(?:\(\s*(?&intersection_type)\s*\))|(?&type)))+)
-)(?:public\s+)?(?:function\s+%s\s*\(\)\s*)\s*(?::\s*(?:(?&union_type)|(?&intersection_type)|(?:\??(?&type)))\s*)?{\s*return\s*\$this->%s;\s*})i
-EOT;
-
+    ((?(DEFINE)
+      (?<type>\\?[a-z_\x7f-\xff][\w\x7f-\xff]*(?:\\[a-z_\x7f-\xff][\w\x7f-\xff]*)*)
+      (?<intersection_type>(?&type)\s*&\s*(?&type))
+      (?<union_type>(?:(?:\(\s*(?&intersection_type)\s*\))|(?&type))(?:\s*\|\s*(?:(?:\(\s*(?&intersection_type)\s*\))|(?&type)))+)
+    )(?:public\s+)?(?:function\s+%s\s*\(\)\s*)\s*(?::\s*(?:(?&union_type)|(?&intersection_type)|(?:\??(?&type)))\s*)?{\s*return\s*\$this->%s;\s*})i
+    EOT;
     /**
      * The namespace that contains all proxy classes.
      *
      * @var string
      */
-    private $proxyNamespace;
-
+    private $proxy_namespace;
     /**
      * The directory that contains all proxy classes.
      *
      * @var string
      */
-    private $proxyDirectory;
-
+    private $proxy_directory;
     /**
      * Map of callables used to fill in placeholders set in the template.
      *
      * @var string[]|callable[]
      */
-    protected $placeholders = [
-        'baseProxyInterface'   => Proxy::class,
-        'additionalProperties' => '',
-    ];
-
+    protected $placeholders = ['baseProxyInterface' => Proxy::class, 'additionalProperties' => ''];
     /**
      * Template used as a blueprint to generate proxies.
      *
      * @var string
      */
-    protected $proxyClassTemplate = '<?php
+    protected $proxy_class_template = '<?php
 
 namespace <namespace>;
 <enumUseStatements>
@@ -262,7 +240,6 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
     <methods>
 }
 ';
-
     /**
      * Initializes a new instance of the <tt>ProxyFactory</tt> class that is
      * connected to the given <tt>EntityManager</tt>.
@@ -272,20 +249,17 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
      *
      * @throws InvalidArgumentException
      */
-    public function __construct($proxyDirectory, $proxyNamespace)
+    public function __construct($proxy_directory, $proxy_namespace)
     {
-        if (! $proxyDirectory) {
-            throw InvalidArgumentException::proxyDirectoryRequired();
+        if (!$proxy_directory) {
+            throw InvalidArgumentException::proxy_directory_required();
         }
-
-        if (! $proxyNamespace) {
-            throw InvalidArgumentException::proxyNamespaceRequired();
+        if (!$proxy_namespace) {
+            throw InvalidArgumentException::proxy_namespace_required();
         }
-
-        $this->proxyDirectory = $proxyDirectory;
-        $this->proxyNamespace = $proxyNamespace;
+        $this->proxy_directory = $proxy_directory;
+        $this->proxy_namespace = $proxy_namespace;
     }
-
     /**
      * Sets a placeholder to be replaced in the template.
      *
@@ -294,25 +268,22 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
      *
      * @throws InvalidArgumentException
      */
-    protected function setPlaceholder($name, $placeholder): void
+    protected function set_placeholder($name, $placeholder): void
     {
-        if (! is_string($placeholder) && ! is_callable($placeholder)) {
-            throw InvalidArgumentException::invalidPlaceholder($name);
+        if (!is_string($placeholder) && !is_callable($placeholder)) {
+            throw InvalidArgumentException::invalid_placeholder($name);
         }
-
         $this->placeholders[$name] = $placeholder;
     }
-
     /**
      * Sets the base template used to create proxy classes.
      *
      * @param string $proxyClassTemplate
      */
-    public function setProxyClassTemplate($proxyClassTemplate): void
+    public function set_proxy_class_template($proxy_class_template): void
     {
-        $this->proxyClassTemplate = (string) $proxyClassTemplate;
+        $this->proxy_class_template = (string) $proxy_class_template;
     }
-
     /**
      * Generates a proxy class file.
      *
@@ -322,642 +293,520 @@ class <proxyShortClassName> extends \<className> implements \<baseProxyInterface
      * @throws InvalidArgumentException
      * @throws UnexpectedValueException
      */
-    public function generateProxyClass(ClassMetadata $class, $fileName = false): void
+    public function generate_proxy_class(Class_Metadata $class, $file_name = false): void
     {
-        $this->verifyClassCanBeProxied($class);
-
-        preg_match_all('(<([a-zA-Z]+)>)', $this->proxyClassTemplate, $placeholderMatches);
-
-        $placeholderMatches = array_combine($placeholderMatches[0], $placeholderMatches[1]);
-        $placeholders       = [];
-
-        foreach ($placeholderMatches as $placeholder => $name) {
+        $this->verify_class_can_be_proxied($class);
+        preg_match_all('(<([a-zA-Z]+)>)', $this->proxy_class_template, $placeholder_matches);
+        $placeholder_matches = array_combine($placeholder_matches[0], $placeholder_matches[1]);
+        $placeholders = [];
+        foreach ($placeholder_matches as $placeholder => $name) {
             $placeholders[$placeholder] = $this->placeholders[$name] ?? [$this, 'generate' . $name];
         }
-
-        foreach ($placeholders as & $placeholder) {
-            if (! is_callable($placeholder)) {
+        foreach ($placeholders as &$placeholder) {
+            if (!is_callable($placeholder)) {
                 continue;
             }
-
             $placeholder = call_user_func($placeholder, $class);
         }
-
-        $proxyCode = strtr($this->proxyClassTemplate, $placeholders);
-
-        if (! $fileName) {
-            $proxyClassName = $this->generateNamespace($class) . '\\' . $this->generateProxyShortClassName($class);
-
-            if (! class_exists($proxyClassName)) {
-                eval(substr($proxyCode, 5));
+        $proxy_code = strtr($this->proxy_class_template, $placeholders);
+        if (!$file_name) {
+            $proxy_class_name = $this->generate_namespace($class) . '\\' . $this->generate_proxy_short_class_name($class);
+            if (!class_exists($proxy_class_name)) {
+                eval(substr($proxy_code, 5));
             }
-
             return;
         }
-
-        $parentDirectory = dirname($fileName);
-
-        if (! is_dir($parentDirectory) && (@mkdir($parentDirectory, 0775, true) === false)) {
-            throw UnexpectedValueException::proxyDirectoryNotWritable($this->proxyDirectory);
+        $parent_directory = dirname($file_name);
+        if (!is_dir($parent_directory) && @mkdir($parent_directory, 0775, true) === false) {
+            throw UnexpectedValueException::proxy_directory_not_writable($this->proxy_directory);
         }
-
-        if (! is_writable($parentDirectory)) {
-            throw UnexpectedValueException::proxyDirectoryNotWritable($this->proxyDirectory);
+        if (!is_writable($parent_directory)) {
+            throw UnexpectedValueException::proxy_directory_not_writable($this->proxy_directory);
         }
-
-        $tmpFileName = $fileName . '.' . bin2hex(random_bytes(12));
-
-        file_put_contents($tmpFileName, $proxyCode);
-        @chmod($tmpFileName, 0664);
-        rename($tmpFileName, $fileName);
+        $tmp_file_name = $file_name . '.' . bin2hex(random_bytes(12));
+        file_put_contents($tmp_file_name, $proxy_code);
+        @chmod($tmp_file_name, 0664);
+        rename($tmp_file_name, $file_name);
     }
-
     /** @throws InvalidArgumentException */
-    private function verifyClassCanBeProxied(ClassMetadata $class): void
+    private function verify_class_can_be_proxied(Class_Metadata $class): void
     {
-        if ($class->getReflectionClass()->isFinal()) {
-            throw InvalidArgumentException::classMustNotBeFinal($class->getName());
+        if ($class->get_reflection_class()->is_final()) {
+            throw InvalidArgumentException::class_must_not_be_final($class->get_name());
         }
-
-        if ($class->getReflectionClass()->isAbstract()) {
-            throw InvalidArgumentException::classMustNotBeAbstract($class->getName());
+        if ($class->get_reflection_class()->is_abstract()) {
+            throw InvalidArgumentException::class_must_not_be_abstract($class->get_name());
         }
-
-        if (PHP_VERSION_ID >= 80200 && $class->getReflectionClass()->isReadOnly()) {
-            throw InvalidArgumentException::classMustNotBeReadOnly($class->getName());
+        if (PHP_VERSION_ID >= 80200 && $class->get_reflection_class()->is_read_only()) {
+            throw InvalidArgumentException::class_must_not_be_read_only($class->get_name());
         }
     }
-
     /**
      * Generates the proxy short class name to be used in the template.
      */
-    private function generateProxyShortClassName(ClassMetadata $class): string
+    private function generate_proxy_short_class_name(Class_Metadata $class): string
     {
-        $proxyClassName = ClassUtils::generateProxyClassName($class->getName(), $this->proxyNamespace);
-        $parts          = explode('\\', strrev($proxyClassName), 2);
-
+        $proxy_class_name = Class_Utils::generate_proxy_class_name($class->get_name(), $this->proxy_namespace);
+        $parts = explode('\\', strrev($proxy_class_name), 2);
         return strrev($parts[0]);
     }
-
     /**
      * Generates the proxy namespace.
      */
-    private function generateNamespace(ClassMetadata $class): string
+    private function generate_namespace(Class_Metadata $class): string
     {
-        $proxyClassName = ClassUtils::generateProxyClassName($class->getName(), $this->proxyNamespace);
-        $parts          = explode('\\', strrev($proxyClassName), 2);
-
+        $proxy_class_name = Class_Utils::generate_proxy_class_name($class->get_name(), $this->proxy_namespace);
+        $parts = explode('\\', strrev($proxy_class_name), 2);
         return strrev($parts[1]);
     }
-
     /**
      * Enums must have a use statement when used as public property defaults.
      */
-    public function generateEnumUseStatements(ClassMetadata $class): string
+    public function generate_enum_use_statements(Class_Metadata $class): string
     {
         if (PHP_VERSION_ID < 80100) {
             return "\n";
         }
-
-        $defaultProperties          = $class->getReflectionClass()->getDefaultProperties();
-        $lazyLoadedPublicProperties = $this->getLazyLoadedPublicPropertiesNames($class);
-        $enumClasses                = [];
-
-        foreach ($class->getReflectionClass()->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            $name = $property->getName();
-
-            if (! in_array($name, $lazyLoadedPublicProperties, true)) {
+        $default_properties = $class->get_reflection_class()->get_default_properties();
+        $lazy_loaded_public_properties = $this->get_lazy_loaded_public_properties_names($class);
+        $enum_classes = [];
+        foreach ($class->get_reflection_class()->get_properties(ReflectionProperty::IS_PUBLIC) as $property) {
+            $name = $property->get_name();
+            if (!in_array($name, $lazy_loaded_public_properties, true)) {
                 continue;
             }
-
-            if (array_key_exists($name, $defaultProperties) && $defaultProperties[$name] instanceof BackedEnum) {
-                $enumClassNameParts = explode('\\', get_class($defaultProperties[$name]));
-                $enumClasses[]      = $enumClassNameParts[0];
+            if (array_key_exists($name, $default_properties) && $default_properties[$name] instanceof Backed_Enum) {
+                $enum_class_name_parts = explode('\\', get_class($default_properties[$name]));
+                $enum_classes[] = $enum_class_name_parts[0];
             }
         }
-
-        return implode(
-            "\n",
-            array_map(
-                static function (string $className): string {
-                    return 'use ' . $className . ';';
-                },
-                array_unique($enumClasses)
-            )
-        ) . "\n";
+        return implode("\n", array_map(static function (string $class_name): string {
+            return 'use ' . $class_name . ';';
+        }, array_unique($enum_classes))) . "\n";
     }
-
     /**
      * Generates the original class name.
      */
-    private function generateClassName(ClassMetadata $class): string
+    private function generate_class_name(Class_Metadata $class): string
     {
-        return ltrim($class->getName(), '\\');
+        return ltrim($class->get_name(), '\\');
     }
-
     /**
      * Generates the array representation of lazy loaded public properties and their default values.
      */
-    private function generateLazyPropertiesNames(ClassMetadata $class): string
+    private function generate_lazy_properties_names(Class_Metadata $class): string
     {
-        $lazyPublicProperties = $this->getLazyLoadedPublicPropertiesNames($class);
-        $values               = [];
-
-        foreach ($lazyPublicProperties as $name) {
+        $lazy_public_properties = $this->get_lazy_loaded_public_properties_names($class);
+        $values = [];
+        foreach ($lazy_public_properties as $name) {
             $values[$name] = null;
         }
-
         return var_export($values, true);
     }
-
     /**
      * Generates the array representation of lazy loaded public properties names.
      */
-    private function generateLazyPropertiesDefaults(ClassMetadata $class): string
+    private function generate_lazy_properties_defaults(Class_Metadata $class): string
     {
-        return var_export($this->getLazyLoadedPublicProperties($class), true);
+        return var_export($this->get_lazy_loaded_public_properties($class), true);
     }
-
     /**
      * Generates the constructor code (un-setting public lazy loaded properties, setting identifier field values).
      */
-    private function generateConstructorImpl(ClassMetadata $class): string
+    private function generate_constructor_impl(Class_Metadata $class): string
     {
-        $constructorImpl = <<<'EOT'
-    public function __construct(?\Closure $initializer = null, ?\Closure $cloner = null)
-    {
-
-EOT;
-
-        $toUnset = array_map(static function (string $name): string {
+        $constructor_impl = <<<'EOT'
+            public function __construct(?\Closure $initializer = null, ?\Closure $cloner = null)
+            {
+        
+        EOT;
+        $to_unset = array_map(static function (string $name): string {
             return '$this->' . $name;
-        }, $this->getLazyLoadedPublicPropertiesNames($class));
-
-        return $constructorImpl . ($toUnset === [] ? '' : '        unset(' . implode(', ', $toUnset) . ");\n")
-            . <<<'EOT'
-
-        $this->__initializer__ = $initializer;
-        $this->__cloner__      = $cloner;
+        }, $this->get_lazy_loaded_public_properties_names($class));
+        return $constructor_impl . ($to_unset === [] ? '' : '        unset(' . implode(', ', $to_unset) . ");\n") . <<<'EOT'
+        
+                $this->__initializer__ = $initializer;
+                $this->__cloner__      = $cloner;
+            }
+        EOT;
     }
-EOT;
-    }
-
     /**
      * Generates the magic getter invoked when lazy loaded public properties are requested.
      */
-    private function generateMagicGet(ClassMetadata $class): string
+    private function generate_magic_get(Class_Metadata $class): string
     {
-        $lazyPublicProperties = $this->getLazyLoadedPublicPropertiesNames($class);
-        $reflectionClass      = $class->getReflectionClass();
-        $hasParentGet         = false;
-        $returnReference      = '';
-        $inheritDoc           = '';
-        $name                 = '$name';
-        $parametersString     = '$name';
-        $returnTypeHint       = null;
-
-        if ($reflectionClass->hasMethod('__get')) {
-            $hasParentGet     = true;
-            $inheritDoc       = '{@inheritDoc}';
-            $methodReflection = $reflectionClass->getMethod('__get');
-
-            if ($methodReflection->returnsReference()) {
-                $returnReference = '& ';
+        $lazy_public_properties = $this->get_lazy_loaded_public_properties_names($class);
+        $reflection_class = $class->get_reflection_class();
+        $has_parent_get = false;
+        $return_reference = '';
+        $inherit_doc = '';
+        $name = '$name';
+        $parameters_string = '$name';
+        $return_type_hint = null;
+        if ($reflection_class->has_method('__get')) {
+            $has_parent_get = true;
+            $inherit_doc = '{@inheritDoc}';
+            $method_reflection = $reflection_class->get_method('__get');
+            if ($method_reflection->returns_reference()) {
+                $return_reference = '& ';
             }
-
-            $methodParameters = $methodReflection->getParameters();
-            $name             = '$' . $methodParameters[0]->getName();
-
-            $parametersString = $this->buildParametersString($methodReflection->getParameters(), ['name']);
-            $returnTypeHint   = $this->getMethodReturnType($methodReflection);
+            $method_parameters = $method_reflection->get_parameters();
+            $name = '$' . $method_parameters[0]->get_name();
+            $parameters_string = $this->build_parameters_string($method_reflection->get_parameters(), ['name']);
+            $return_type_hint = $this->get_method_return_type($method_reflection);
         }
-
-        if (empty($lazyPublicProperties) && ! $hasParentGet) {
+        if (empty($lazy_public_properties) && !$has_parent_get) {
             return '';
         }
-
-        $magicGet = <<<EOT
-    /**
-     * $inheritDoc
-     * @param string \$name
-     */
-    public function {$returnReference}__get($parametersString)$returnTypeHint
-    {
-
-EOT;
-
-        if (! empty($lazyPublicProperties)) {
-            $magicGet .= <<<'EOT'
-        if (\array_key_exists($name, self::$lazyPropertiesNames)) {
-            $this->__initializer__ && $this->__initializer__->__invoke($this, '__get', [$name]);
-EOT;
-
-            if ($returnTypeHint === ': void') {
-                $magicGet .= "\n            return;";
+        $magic_get = <<<EOT
+            /**
+             * {$inherit_doc}
+             * @param string \$name
+             */
+            public function {$return_reference}__get({$parameters_string}){$return_type_hint}
+            {
+        
+        EOT;
+        if (!empty($lazy_public_properties)) {
+            $magic_get .= <<<'EOT'
+                    if (\array_key_exists($name, self::$lazyPropertiesNames)) {
+                        $this->__initializer__ && $this->__initializer__->__invoke($this, '__get', [$name]);
+            EOT;
+            if ($return_type_hint === ': void') {
+                $magic_get .= "\n            return;";
             } else {
-                $magicGet .= "\n            return \$this->\$name;";
+                $magic_get .= "\n            return \$this->\$name;";
             }
-
-            $magicGet .= <<<'EOT'
-
+            $magic_get .= <<<'EOT'
+            
+                    }
+            
+            
+            EOT;
         }
-
-
-EOT;
-        }
-
-        if ($hasParentGet) {
-            $magicGet .= <<<'EOT'
-        $this->__initializer__ && $this->__initializer__->__invoke($this, '__get', [$name]);
-EOT;
-
-            if ($returnTypeHint === ': void') {
-                $magicGet .= <<<'EOT'
-
-        parent::__get($name);
-        return;
-EOT;
-            } elseif ($returnTypeHint === ': never') {
-                $magicGet .= <<<'EOT'
-
-        parent::__get($name);
-EOT;
+        if ($has_parent_get) {
+            $magic_get .= <<<'EOT'
+                    $this->__initializer__ && $this->__initializer__->__invoke($this, '__get', [$name]);
+            EOT;
+            if ($return_type_hint === ': void') {
+                $magic_get .= <<<'EOT'
+                
+                        parent::__get($name);
+                        return;
+                EOT;
+            } elseif ($return_type_hint === ': never') {
+                $magic_get .= <<<'EOT'
+                
+                        parent::__get($name);
+                EOT;
             } else {
-                $magicGet .= <<<'EOT'
-
-        return parent::__get($name);
-EOT;
+                $magic_get .= <<<'EOT'
+                
+                        return parent::__get($name);
+                EOT;
             }
         } else {
-            $magicGet .= sprintf(<<<EOT
-        trigger_error(sprintf('Undefined property: %%s::$%%s', __CLASS__, %s), E_USER_NOTICE);
-
-EOT
-                , $name);
+            $magic_get .= sprintf(<<<EOT
+                    trigger_error(sprintf('Undefined property: %%s::\$%%s', __CLASS__, %s), E_USER_NOTICE);
+            
+            EOT, $name);
         }
-
-        return $magicGet . "\n    }";
+        return $magic_get . "\n    }";
     }
-
     /**
      * Generates the magic setter (currently unused).
      */
-    private function generateMagicSet(ClassMetadata $class): string
+    private function generate_magic_set(Class_Metadata $class): string
     {
-        $lazyPublicProperties = $this->getLazyLoadedPublicPropertiesNames($class);
-        $reflectionClass      = $class->getReflectionClass();
-        $hasParentSet         = false;
-        $inheritDoc           = '';
-        $parametersString     = '$name, $value';
-        $returnTypeHint       = null;
-
-        if ($reflectionClass->hasMethod('__set')) {
-            $hasParentSet     = true;
-            $inheritDoc       = '{@inheritDoc}';
-            $methodReflection = $reflectionClass->getMethod('__set');
-
-            $parametersString = $this->buildParametersString($methodReflection->getParameters(), ['name', 'value']);
-            $returnTypeHint   = $this->getMethodReturnType($methodReflection);
+        $lazy_public_properties = $this->get_lazy_loaded_public_properties_names($class);
+        $reflection_class = $class->get_reflection_class();
+        $has_parent_set = false;
+        $inherit_doc = '';
+        $parameters_string = '$name, $value';
+        $return_type_hint = null;
+        if ($reflection_class->has_method('__set')) {
+            $has_parent_set = true;
+            $inherit_doc = '{@inheritDoc}';
+            $method_reflection = $reflection_class->get_method('__set');
+            $parameters_string = $this->build_parameters_string($method_reflection->get_parameters(), ['name', 'value']);
+            $return_type_hint = $this->get_method_return_type($method_reflection);
         }
-
-        if (empty($lazyPublicProperties) && ! $hasParentSet) {
+        if (empty($lazy_public_properties) && !$has_parent_set) {
             return '';
         }
-
-        $magicSet = <<<EOT
-    /**
-     * $inheritDoc
-     * @param string \$name
-     * @param mixed  \$value
-     */
-    public function __set($parametersString)$returnTypeHint
-    {
-
-EOT;
-
-        if (! empty($lazyPublicProperties)) {
-            $magicSet .= <<<'EOT'
-        if (\array_key_exists($name, self::$lazyPropertiesNames)) {
-            $this->__initializer__ && $this->__initializer__->__invoke($this, '__set', [$name, $value]);
-
-            $this->$name = $value;
-
-            return;
+        $magic_set = <<<EOT
+            /**
+             * {$inherit_doc}
+             * @param string \$name
+             * @param mixed  \$value
+             */
+            public function __set({$parameters_string}){$return_type_hint}
+            {
+        
+        EOT;
+        if (!empty($lazy_public_properties)) {
+            $magic_set .= <<<'EOT'
+                    if (\array_key_exists($name, self::$lazyPropertiesNames)) {
+                        $this->__initializer__ && $this->__initializer__->__invoke($this, '__set', [$name, $value]);
+            
+                        $this->$name = $value;
+            
+                        return;
+                    }
+            
+            
+            EOT;
         }
-
-
-EOT;
-        }
-
-        if ($hasParentSet) {
-            $magicSet .= <<<'EOT'
-        $this->__initializer__ && $this->__initializer__->__invoke($this, '__set', [$name, $value]);
-EOT;
-
-            if ($returnTypeHint === ': void') {
-                $magicSet .= <<<'EOT'
-
-        parent::__set($name, $value);
-        return;
-EOT;
-            } elseif ($returnTypeHint === ': never') {
-                $magicSet .= <<<'EOT'
-
-        parent::__set($name, $value);
-EOT;
+        if ($has_parent_set) {
+            $magic_set .= <<<'EOT'
+                    $this->__initializer__ && $this->__initializer__->__invoke($this, '__set', [$name, $value]);
+            EOT;
+            if ($return_type_hint === ': void') {
+                $magic_set .= <<<'EOT'
+                
+                        parent::__set($name, $value);
+                        return;
+                EOT;
+            } elseif ($return_type_hint === ': never') {
+                $magic_set .= <<<'EOT'
+                
+                        parent::__set($name, $value);
+                EOT;
             } else {
-                $magicSet .= <<<'EOT'
-
-        return parent::__set($name, $value);
-EOT;
+                $magic_set .= <<<'EOT'
+                
+                        return parent::__set($name, $value);
+                EOT;
             }
         } else {
-            $magicSet .= '        $this->$name = $value;';
+            $magic_set .= '        $this->$name = $value;';
         }
-
-        return $magicSet . "\n    }";
+        return $magic_set . "\n    }";
     }
-
     /**
      * Generates the magic issetter invoked when lazy loaded public properties are checked against isset().
      */
-    private function generateMagicIsset(ClassMetadata $class): string
+    private function generate_magic_isset(Class_Metadata $class): string
     {
-        $lazyPublicProperties = $this->getLazyLoadedPublicPropertiesNames($class);
-        $hasParentIsset       = $class->getReflectionClass()->hasMethod('__isset');
-        $parametersString     = '$name';
-        $returnTypeHint       = null;
-
-        if ($hasParentIsset) {
-            $methodReflection = $class->getReflectionClass()->getMethod('__isset');
-            $parametersString = $this->buildParametersString($methodReflection->getParameters(), ['name']);
-            $returnTypeHint   = $this->getMethodReturnType($methodReflection);
+        $lazy_public_properties = $this->get_lazy_loaded_public_properties_names($class);
+        $has_parent_isset = $class->get_reflection_class()->has_method('__isset');
+        $parameters_string = '$name';
+        $return_type_hint = null;
+        if ($has_parent_isset) {
+            $method_reflection = $class->get_reflection_class()->get_method('__isset');
+            $parameters_string = $this->build_parameters_string($method_reflection->get_parameters(), ['name']);
+            $return_type_hint = $this->get_method_return_type($method_reflection);
         }
-
-        if (empty($lazyPublicProperties) && ! $hasParentIsset) {
+        if (empty($lazy_public_properties) && !$has_parent_isset) {
             return '';
         }
-
-        $inheritDoc = $hasParentIsset ? '{@inheritDoc}' : '';
-        $magicIsset = <<<EOT
-    /**
-     * $inheritDoc
-     * @param  string \$name
-     * @return boolean
-     */
-    public function __isset($parametersString)$returnTypeHint
-    {
-
-EOT;
-
-        if (! empty($lazyPublicProperties)) {
-            $magicIsset .= <<<'EOT'
-        if (\array_key_exists($name, self::$lazyPropertiesNames)) {
-            $this->__initializer__ && $this->__initializer__->__invoke($this, '__isset', [$name]);
-
-            return isset($this->$name);
+        $inherit_doc = $has_parent_isset ? '{@inheritDoc}' : '';
+        $magic_isset = <<<EOT
+            /**
+             * {$inherit_doc}
+             * @param  string \$name
+             * @return boolean
+             */
+            public function __isset({$parameters_string}){$return_type_hint}
+            {
+        
+        EOT;
+        if (!empty($lazy_public_properties)) {
+            $magic_isset .= <<<'EOT'
+                    if (\array_key_exists($name, self::$lazyPropertiesNames)) {
+                        $this->__initializer__ && $this->__initializer__->__invoke($this, '__isset', [$name]);
+            
+                        return isset($this->$name);
+                    }
+            
+            
+            EOT;
         }
-
-
-EOT;
-        }
-
-        if ($hasParentIsset) {
-            $magicIsset .= <<<'EOT'
-        $this->__initializer__ && $this->__initializer__->__invoke($this, '__isset', [$name]);
-
-        return parent::__isset($name);
-EOT;
+        if ($has_parent_isset) {
+            $magic_isset .= <<<'EOT'
+                    $this->__initializer__ && $this->__initializer__->__invoke($this, '__isset', [$name]);
+            
+                    return parent::__isset($name);
+            EOT;
         } else {
-            $magicIsset .= '        return false;';
+            $magic_isset .= '        return false;';
         }
-
-        return $magicIsset . "\n    }";
+        return $magic_isset . "\n    }";
     }
-
     /**
      * Generates implementation for the `__sleep` method of proxies.
      */
-    private function generateSleepImpl(ClassMetadata $class): string
+    private function generate_sleep_impl(Class_Metadata $class): string
     {
-        $reflectionClass = $class->getReflectionClass();
-
-        $hasParentSleep = $reflectionClass->hasMethod('__sleep');
-        $inheritDoc     = $hasParentSleep ? '{@inheritDoc}' : '';
-        $returnTypeHint = $hasParentSleep ? $this->getMethodReturnType($reflectionClass->getMethod('__sleep')) : '';
-        $sleepImpl      = <<<EOT
-    /**
-     * $inheritDoc
-     * @return array
-     */
-    public function __sleep()$returnTypeHint
-    {
-
-EOT;
-
-        if ($hasParentSleep) {
-            return $sleepImpl . <<<'EOT'
-        $properties = array_merge(['__isInitialized__'], parent::__sleep());
-
-        if ($this->__isInitialized__) {
-            $properties = array_diff($properties, array_keys(self::$lazyPropertiesNames));
+        $reflection_class = $class->get_reflection_class();
+        $has_parent_sleep = $reflection_class->has_method('__sleep');
+        $inherit_doc = $has_parent_sleep ? '{@inheritDoc}' : '';
+        $return_type_hint = $has_parent_sleep ? $this->get_method_return_type($reflection_class->get_method('__sleep')) : '';
+        $sleep_impl = <<<EOT
+            /**
+             * {$inherit_doc}
+             * @return array
+             */
+            public function __sleep(){$return_type_hint}
+            {
+        
+        EOT;
+        if ($has_parent_sleep) {
+            return $sleep_impl . <<<'EOT'
+                    $properties = array_merge(['__isInitialized__'], parent::__sleep());
+            
+                    if ($this->__isInitialized__) {
+                        $properties = array_diff($properties, array_keys(self::$lazyPropertiesNames));
+                    }
+            
+                    return $properties;
+                }
+            EOT;
         }
-
-        return $properties;
-    }
-EOT;
-        }
-
-        $allProperties = ['__isInitialized__'];
-
-        foreach ($class->getReflectionClass()->getProperties() as $prop) {
+        $all_properties = ['__isInitialized__'];
+        foreach ($class->get_reflection_class()->get_properties() as $prop) {
             assert($prop instanceof ReflectionProperty);
-            if ($prop->isStatic()) {
+            if ($prop->is_static()) {
                 continue;
             }
-
-            $allProperties[] = $prop->isPrivate()
-                ? "\0" . $prop->getDeclaringClass()->getName() . "\0" . $prop->getName()
-                : $prop->getName();
+            $all_properties[] = $prop->is_private() ? "\x00" . $prop->get_declaring_class()->get_name() . "\x00" . $prop->get_name() : $prop->get_name();
         }
-
-        $lazyPublicProperties = $this->getLazyLoadedPublicPropertiesNames($class);
-        $protectedProperties  = array_diff($allProperties, $lazyPublicProperties);
-
-        foreach ($allProperties as &$property) {
+        $lazy_public_properties = $this->get_lazy_loaded_public_properties_names($class);
+        $protected_properties = array_diff($all_properties, $lazy_public_properties);
+        foreach ($all_properties as &$property) {
             $property = var_export($property, true);
         }
-
-        foreach ($protectedProperties as &$property) {
+        foreach ($protected_properties as &$property) {
             $property = var_export($property, true);
         }
-
-        $allProperties       = implode(', ', $allProperties);
-        $protectedProperties = implode(', ', $protectedProperties);
-
-        return $sleepImpl . <<<EOT
-        if (\$this->__isInitialized__) {
-            return [$allProperties];
-        }
-
-        return [$protectedProperties];
+        $all_properties = implode(', ', $all_properties);
+        $protected_properties = implode(', ', $protected_properties);
+        return $sleep_impl . <<<EOT
+                if (\$this->__isInitialized__) {
+                    return [{$all_properties}];
+                }
+        
+                return [{$protected_properties}];
+            }
+        EOT;
     }
-EOT;
-    }
-
     /**
      * Generates implementation for the `__wakeup` method of proxies.
      */
-    private function generateWakeupImpl(ClassMetadata $class): string
+    private function generate_wakeup_impl(Class_Metadata $class): string
     {
-        $reflectionClass = $class->getReflectionClass();
-
-        $hasParentWakeup = $reflectionClass->hasMethod('__wakeup');
-
-        $unsetPublicProperties = [];
-        foreach ($this->getLazyLoadedPublicPropertiesNames($class) as $lazyPublicProperty) {
-            $unsetPublicProperties[] = '$this->' . $lazyPublicProperty;
+        $reflection_class = $class->get_reflection_class();
+        $has_parent_wakeup = $reflection_class->has_method('__wakeup');
+        $unset_public_properties = [];
+        foreach ($this->get_lazy_loaded_public_properties_names($class) as $lazy_public_property) {
+            $unset_public_properties[] = '$this->' . $lazy_public_property;
         }
-
-        $shortName      = $this->generateProxyShortClassName($class);
-        $inheritDoc     = $hasParentWakeup ? '{@inheritDoc}' : '';
-        $returnTypeHint = $hasParentWakeup ? $this->getMethodReturnType($reflectionClass->getMethod('__wakeup')) : '';
-        $wakeupImpl     = <<<EOT
-    /**
-     * $inheritDoc
-     */
-    public function __wakeup()$returnTypeHint
-    {
-        if ( ! \$this->__isInitialized__) {
-            \$this->__initializer__ = function ($shortName \$proxy) {
-                \$proxy->__setInitializer(null);
-                \$proxy->__setCloner(null);
-
-                \$existingProperties = get_object_vars(\$proxy);
-
-                foreach (\$proxy::\$lazyPropertiesDefaults as \$property => \$defaultValue) {
-                    if ( ! array_key_exists(\$property, \$existingProperties)) {
-                        \$proxy->\$property = \$defaultValue;
-                    }
-                }
-            };
-
-EOT;
-
-        if (! empty($unsetPublicProperties)) {
-            $wakeupImpl .= "\n            unset(" . implode(', ', $unsetPublicProperties) . ');';
+        $short_name = $this->generate_proxy_short_class_name($class);
+        $inherit_doc = $has_parent_wakeup ? '{@inheritDoc}' : '';
+        $return_type_hint = $has_parent_wakeup ? $this->get_method_return_type($reflection_class->get_method('__wakeup')) : '';
+        $wakeup_impl = <<<EOT
+            /**
+             * {$inherit_doc}
+             */
+            public function __wakeup(){$return_type_hint}
+            {
+                if ( ! \$this->__isInitialized__) {
+                    \$this->__initializer__ = function ({$short_name} \$proxy) {
+                        \$proxy->__setInitializer(null);
+                        \$proxy->__setCloner(null);
+        
+                        \$existingProperties = get_object_vars(\$proxy);
+        
+                        foreach (\$proxy::\$lazyPropertiesDefaults as \$property => \$defaultValue) {
+                            if ( ! array_key_exists(\$property, \$existingProperties)) {
+                                \$proxy->\$property = \$defaultValue;
+                            }
+                        }
+                    };
+        
+        EOT;
+        if (!empty($unset_public_properties)) {
+            $wakeup_impl .= "\n            unset(" . implode(', ', $unset_public_properties) . ');';
         }
-
-        $wakeupImpl .= "\n        }";
-
-        if ($hasParentWakeup) {
-            $wakeupImpl .= "\n        parent::__wakeup();";
+        $wakeup_impl .= "\n        }";
+        if ($has_parent_wakeup) {
+            $wakeup_impl .= "\n        parent::__wakeup();";
         }
-
-        return $wakeupImpl . "\n    }";
+        return $wakeup_impl . "\n    }";
     }
-
     /**
      * Generates implementation for the `__clone` method of proxies.
      */
-    private function generateCloneImpl(ClassMetadata $class): string
+    private function generate_clone_impl(Class_Metadata $class): string
     {
-        $reflectionClass = $class->getReflectionClass();
-        $hasParentClone  = $reflectionClass->hasMethod('__clone');
-        $returnTypeHint  = $hasParentClone ? $this->getMethodReturnType($reflectionClass->getMethod('__clone')) : '';
-        $inheritDoc      = $hasParentClone ? '{@inheritDoc}' : '';
-        $callParentClone = $hasParentClone ? "\n        parent::__clone();\n" : '';
-
+        $reflection_class = $class->get_reflection_class();
+        $has_parent_clone = $reflection_class->has_method('__clone');
+        $return_type_hint = $has_parent_clone ? $this->get_method_return_type($reflection_class->get_method('__clone')) : '';
+        $inherit_doc = $has_parent_clone ? '{@inheritDoc}' : '';
+        $call_parent_clone = $has_parent_clone ? "\n        parent::__clone();\n" : '';
         return <<<EOT
-    /**
-     * $inheritDoc
-     */
-    public function __clone()$returnTypeHint
-    {
-        \$this->__cloner__ && \$this->__cloner__->__invoke(\$this, '__clone', []);
-$callParentClone    }
-EOT;
+            /**
+             * {$inherit_doc}
+             */
+            public function __clone(){$return_type_hint}
+            {
+                \$this->__cloner__ && \$this->__cloner__->__invoke(\$this, '__clone', []);
+        {$call_parent_clone}    }
+        EOT;
     }
-
     /**
      * Generates decorated methods by picking those available in the parent class.
      */
-    private function generateMethods(ClassMetadata $class): string
+    private function generate_methods(Class_Metadata $class): string
     {
-        $methods           = '';
-        $methodNames       = [];
-        $reflectionMethods = $class->getReflectionClass()->getMethods(ReflectionMethod::IS_PUBLIC);
-        $skippedMethods    = [
-            '__sleep'   => true,
-            '__clone'   => true,
-            '__wakeup'  => true,
-            '__get'     => true,
-            '__set'     => true,
-            '__isset'   => true,
-        ];
-
-        foreach ($reflectionMethods as $method) {
-            $name = $method->getName();
-            if ($method->isConstructor()) {
+        $methods = '';
+        $method_names = [];
+        $reflection_methods = $class->get_reflection_class()->get_methods(ReflectionMethod::IS_PUBLIC);
+        $skipped_methods = ['__sleep' => true, '__clone' => true, '__wakeup' => true, '__get' => true, '__set' => true, '__isset' => true];
+        foreach ($reflection_methods as $method) {
+            $name = $method->get_name();
+            if ($method->is_constructor()) {
                 continue;
             }
-            if (isset($skippedMethods[strtolower($name)])) {
+            if (isset($skipped_methods[strtolower($name)])) {
                 continue;
             }
-            if (isset($methodNames[$name])) {
+            if (isset($method_names[$name])) {
                 continue;
             }
-            if ($method->isFinal()) {
+            if ($method->is_final()) {
                 continue;
             }
-            if ($method->isStatic()) {
+            if ($method->is_static()) {
                 continue;
             }
-            if (! $method->isPublic()) {
+            if (!$method->is_public()) {
                 continue;
             }
-
-            $methodNames[$name] = true;
-            $methods           .= "\n    /**\n"
-                . "     * {@inheritDoc}\n"
-                . "     */\n"
-                . '    public function ';
-
-            if ($method->returnsReference()) {
+            $method_names[$name] = true;
+            $methods .= "\n    /**\n" . "     * {@inheritDoc}\n" . "     */\n" . '    public function ';
+            if ($method->returns_reference()) {
                 $methods .= '&';
             }
-
-            $methods .= $name . '(' . $this->buildParametersString($method->getParameters()) . ')';
-            $methods .= $this->getMethodReturnType($method);
+            $methods .= $name . '(' . $this->build_parameters_string($method->get_parameters()) . ')';
+            $methods .= $this->get_method_return_type($method);
             $methods .= "\n" . '    {' . "\n";
-
-            if ($this->isShortIdentifierGetter($method, $class)) {
+            if ($this->is_short_identifier_getter($method, $class)) {
                 $identifier = lcfirst(substr($name, 3));
-                $fieldType  = $class->getTypeOfField($identifier);
-                $cast       = in_array($fieldType, ['integer', 'smallint'], true) ? '(int) ' : '';
-
+                $field_type = $class->get_type_of_field($identifier);
+                $cast = in_array($field_type, ['integer', 'smallint'], true) ? '(int) ' : '';
                 $methods .= '        if ($this->__isInitialized__ === false) {' . "\n";
                 $methods .= '            ';
-                $methods .= $this->shouldProxiedMethodReturn($method) ? 'return ' : '';
-                $methods .= $cast . ' parent::' . $method->getName() . "();\n";
+                $methods .= $this->should_proxied_method_return($method) ? 'return ' : '';
+                $methods .= $cast . ' parent::' . $method->get_name() . "();\n";
                 $methods .= '        }' . "\n\n";
             }
-
-            $invokeParamsString = implode(', ', $this->getParameterNamesForInvoke($method->getParameters()));
-            $callParamsString   = implode(', ', $this->getParameterNamesForParentCall($method->getParameters()));
-
-            $methods .= "\n        \$this->__initializer__ "
-                . '&& $this->__initializer__->__invoke($this, ' . var_export($name, true)
-                . ', [' . $invokeParamsString . ']);'
-                . "\n\n        "
-                . ($this->shouldProxiedMethodReturn($method) ? 'return ' : '')
-                . 'parent::' . $name . '(' . $callParamsString . ');'
-                . "\n" . '    }' . "\n";
+            $invoke_params_string = implode(', ', $this->get_parameter_names_for_invoke($method->get_parameters()));
+            $call_params_string = implode(', ', $this->get_parameter_names_for_parent_call($method->get_parameters()));
+            $methods .= "\n        \$this->__initializer__ " . '&& $this->__initializer__->__invoke($this, ' . var_export($name, true) . ', [' . $invoke_params_string . ']);' . "\n\n        " . ($this->should_proxied_method_return($method) ? 'return ' : '') . 'parent::' . $name . '(' . $call_params_string . ');' . "\n" . '    }' . "\n";
         }
-
         return $methods;
     }
-
     /**
      * Generates the Proxy file name.
      *
@@ -967,14 +816,11 @@ EOT;
      *                              EntityManager will be used by this factory.
      * @psalm-param class-string $className
      */
-    public function getProxyFileName($className, $baseDirectory = null): string
+    public function get_proxy_file_name($class_name, $base_directory = null): string
     {
-        $baseDirectory = $baseDirectory ?: $this->proxyDirectory;
-
-        return rtrim($baseDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . Proxy::MARKER
-            . str_replace('\\', '', $className) . '.php';
+        $base_directory = $base_directory ?: $this->proxy_directory;
+        return rtrim($base_directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . Proxy::MARKER . str_replace('\\', '', $class_name) . '.php';
     }
-
     /**
      * Checks if the method is a short identifier getter.
      *
@@ -986,292 +832,207 @@ EOT;
      *
      * @param ReflectionMethod $method
      */
-    private function isShortIdentifierGetter($method, ClassMetadata $class): bool
+    private function is_short_identifier_getter($method, Class_Metadata $class): bool
     {
-        $identifier = lcfirst(substr($method->getName(), 3));
-        $startLine  = $method->getStartLine();
-        $endLine    = $method->getEndLine();
-        $cheapCheck = $method->getNumberOfParameters() === 0
-            && substr($method->getName(), 0, 3) === 'get'
-            && in_array($identifier, $class->getIdentifier(), true)
-            && $class->hasField($identifier)
-            && ($endLine - $startLine <= 4);
-
-        if ($cheapCheck) {
-            $code = file($method->getFileName());
-            $code = trim(implode(' ', array_slice($code, $startLine - 1, $endLine - $startLine + 1)));
-
-            $pattern = sprintf(self::PATTERN_MATCH_ID_METHOD, $method->getName(), $identifier);
-
+        $identifier = lcfirst(substr($method->get_name(), 3));
+        $start_line = $method->get_start_line();
+        $end_line = $method->get_end_line();
+        $cheap_check = $method->get_number_of_parameters() === 0 && substr($method->get_name(), 0, 3) === 'get' && in_array($identifier, $class->get_identifier(), true) && $class->has_field($identifier) && $end_line - $start_line <= 4;
+        if ($cheap_check) {
+            $code = file($method->get_file_name());
+            $code = trim(implode(' ', array_slice($code, $start_line - 1, $end_line - $start_line + 1)));
+            $pattern = sprintf(self::PATTERN_MATCH_ID_METHOD, $method->get_name(), $identifier);
             if (preg_match($pattern, $code)) {
                 return true;
             }
         }
-
         return false;
     }
-
     /**
      * Generates the list of public properties to be lazy loaded.
      *
      * @return array<int, string>
      */
-    private function getLazyLoadedPublicPropertiesNames(ClassMetadata $class): array
+    private function get_lazy_loaded_public_properties_names(Class_Metadata $class): array
     {
         $properties = [];
-
-        foreach ($class->getReflectionClass()->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            $name = $property->getName();
-            if (! $class->hasField($name) && ! $class->hasAssociation($name)) {
+        foreach ($class->get_reflection_class()->get_properties(ReflectionProperty::IS_PUBLIC) as $property) {
+            $name = $property->get_name();
+            if (!$class->has_field($name) && !$class->has_association($name)) {
                 continue;
             }
-            if ($class->isIdentifier($name)) {
+            if ($class->is_identifier($name)) {
                 continue;
             }
-
             $properties[] = $name;
         }
-
         return $properties;
     }
-
     /**
      * Generates the list of default values of public properties.
      *
      * @return mixed[]
      */
-    private function getLazyLoadedPublicProperties(ClassMetadata $class): array
+    private function get_lazy_loaded_public_properties(Class_Metadata $class): array
     {
-        $defaultProperties          = $class->getReflectionClass()->getDefaultProperties();
-        $lazyLoadedPublicProperties = $this->getLazyLoadedPublicPropertiesNames($class);
-        $defaultValues              = [];
-
-        foreach ($class->getReflectionClass()->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            $name = $property->getName();
-
-            if (! in_array($name, $lazyLoadedPublicProperties, true)) {
+        $default_properties = $class->get_reflection_class()->get_default_properties();
+        $lazy_loaded_public_properties = $this->get_lazy_loaded_public_properties_names($class);
+        $default_values = [];
+        foreach ($class->get_reflection_class()->get_properties(ReflectionProperty::IS_PUBLIC) as $property) {
+            $name = $property->get_name();
+            if (!in_array($name, $lazy_loaded_public_properties, true)) {
                 continue;
             }
-
-            if (array_key_exists($name, $defaultProperties)) {
-                $defaultValues[$name] = $defaultProperties[$name];
+            if (array_key_exists($name, $default_properties)) {
+                $default_values[$name] = $default_properties[$name];
             } elseif (method_exists($property, 'getType')) {
-                $propertyType = $property->getType();
-                if ($propertyType !== null && $propertyType->allowsNull()) {
-                    $defaultValues[$name] = null;
+                $property_type = $property->get_type();
+                if ($property_type !== null && $property_type->allows_null()) {
+                    $default_values[$name] = null;
                 }
             }
         }
-
-        return $defaultValues;
+        return $default_values;
     }
-
     /**
      * @param ReflectionParameter[] $parameters
      * @param string[]              $renameParameters
      */
-    private function buildParametersString(array $parameters, array $renameParameters = []): string
+    private function build_parameters_string(array $parameters, array $rename_parameters = []): string
     {
-        $parameterDefinitions = [];
-
+        $parameter_definitions = [];
         $i = -1;
         foreach ($parameters as $param) {
             assert($param instanceof ReflectionParameter);
             $i++;
-            $parameterDefinition = '';
-            $parameterType       = $this->getParameterType($param);
-
-            if ($parameterType !== null) {
-                $parameterDefinition .= $parameterType . ' ';
+            $parameter_definition = '';
+            $parameter_type = $this->get_parameter_type($param);
+            if ($parameter_type !== null) {
+                $parameter_definition .= $parameter_type . ' ';
             }
-
-            if ($param->isPassedByReference()) {
-                $parameterDefinition .= '&';
+            if ($param->is_passed_by_reference()) {
+                $parameter_definition .= '&';
             }
-
-            if ($param->isVariadic()) {
-                $parameterDefinition .= '...';
+            if ($param->is_variadic()) {
+                $parameter_definition .= '...';
             }
-
-            $parameterDefinition .= '$' . ($renameParameters ? $renameParameters[$i] : $param->getName());
-            $parameterDefinition .= $this->getParameterDefaultValue($param);
-
-            $parameterDefinitions[] = $parameterDefinition;
+            $parameter_definition .= '$' . ($rename_parameters ? $rename_parameters[$i] : $param->get_name());
+            $parameter_definition .= $this->get_parameter_default_value($param);
+            $parameter_definitions[] = $parameter_definition;
         }
-
-        return implode(', ', $parameterDefinitions);
+        return implode(', ', $parameter_definitions);
     }
-
     /** @return string|null */
-    private function getParameterType(ReflectionParameter $parameter)
+    private function get_parameter_type(ReflectionParameter $parameter)
     {
-        if (! $parameter->hasType()) {
+        if (!$parameter->has_type()) {
             return null;
         }
-
-        $declaringFunction = $parameter->getDeclaringFunction();
-
-        assert($declaringFunction instanceof ReflectionMethod);
-
-        return $this->formatType($parameter->getType(), $declaringFunction, $parameter);
+        $declaring_function = $parameter->get_declaring_function();
+        assert($declaring_function instanceof ReflectionMethod);
+        return $this->format_type($parameter->get_type(), $declaring_function, $parameter);
     }
-
-    private function getParameterDefaultValue(ReflectionParameter $parameter): string
+    private function get_parameter_default_value(ReflectionParameter $parameter): string
     {
-        if (! $parameter->isDefaultValueAvailable()) {
+        if (!$parameter->is_default_value_available()) {
             return '';
         }
-
-        if (PHP_VERSION_ID < 80100 || is_scalar($parameter->getDefaultValue())) {
-            return ' = ' . var_export($parameter->getDefaultValue(), true);
+        if (PHP_VERSION_ID < 80100 || is_scalar($parameter->get_default_value())) {
+            return ' = ' . var_export($parameter->get_default_value(), true);
         }
-
-        $value = rtrim(substr(explode('$' . $parameter->getName() . ' = ', (string) $parameter, 2)[1], 0, -2));
-
+        $value = rtrim(substr(explode('$' . $parameter->get_name() . ' = ', (string) $parameter, 2)[1], 0, -2));
         if (strpos($value, '\\') !== false || strpos($value, '::') !== false) {
             $value = preg_split("/('(?:[^'\\\\]*+(?:\\\\.)*+)*+')/", $value, -1, PREG_SPLIT_DELIM_CAPTURE);
             foreach ($value as $i => $part) {
                 if ($i % 2 === 0) {
-                    $value[$i] = preg_replace('/(?<![a-zA-Z0-9_\x7f-\xff\\\\])[a-zA-Z0-9_\x7f-\xff]++(?:\\\\[a-zA-Z0-9_\x7f-\xff]++|::)++/', '\\\\\0', $part);
+                    $value[$i] = preg_replace('/(?<![a-zA-Z0-9_\x7f-\xff\\\\])[a-zA-Z0-9_\x7f-\xff]++(?:\\\\[a-zA-Z0-9_\x7f-\xff]++|::)++/', '\\\\\\0', $part);
                 }
             }
-
             $value = implode('', $value);
         }
-
         return ' = ' . $value;
     }
-
     /**
      * @param ReflectionParameter[] $parameters
      *
      * @return string[]
      */
-    private function getParameterNamesForInvoke(array $parameters): array
+    private function get_parameter_names_for_invoke(array $parameters): array
     {
-        return array_map(
-            static function (ReflectionParameter $parameter): string {
-                return '$' . $parameter->getName();
-            },
-            $parameters
-        );
+        return array_map(static function (ReflectionParameter $parameter): string {
+            return '$' . $parameter->get_name();
+        }, $parameters);
     }
-
     /**
      * @param ReflectionParameter[] $parameters
      *
      * @return string[]
      */
-    private function getParameterNamesForParentCall(array $parameters): array
+    private function get_parameter_names_for_parent_call(array $parameters): array
     {
-        return array_map(
-            static function (ReflectionParameter $parameter): string {
-                $name = '';
-
-                if ($parameter->isVariadic()) {
-                    $name .= '...';
-                }
-
-                return $name . ('$' . $parameter->getName());
-            },
-            $parameters
-        );
+        return array_map(static function (ReflectionParameter $parameter): string {
+            $name = '';
+            if ($parameter->is_variadic()) {
+                $name .= '...';
+            }
+            return $name . ('$' . $parameter->get_name());
+        }, $parameters);
     }
-
-    private function getMethodReturnType(ReflectionMethod $method): string
+    private function get_method_return_type(ReflectionMethod $method): string
     {
-        if (! $method->hasReturnType()) {
+        if (!$method->has_return_type()) {
             return '';
         }
-
-        return ': ' . $this->formatType($method->getReturnType(), $method);
+        return ': ' . $this->format_type($method->get_return_type(), $method);
     }
-
     /** @return bool */
-    private function shouldProxiedMethodReturn(ReflectionMethod $method)
+    private function should_proxied_method_return(ReflectionMethod $method)
     {
-        if (! $method->hasReturnType()) {
+        if (!$method->has_return_type()) {
             return true;
         }
-
-        return ! in_array(
-            strtolower($this->formatType($method->getReturnType(), $method)),
-            ['void', 'never'],
-            true
-        );
+        return !in_array(strtolower($this->format_type($method->get_return_type(), $method)), ['void', 'never'], true);
     }
-
     /** @return string */
-    private function formatType(
-        ReflectionType $type,
-        ReflectionMethod $method,
-        ?ReflectionParameter $parameter = null
-    ) {
+    private function format_type(Reflection_Type $type, ReflectionMethod $method, ?ReflectionParameter $parameter = null)
+    {
         if ($type instanceof ReflectionUnionType) {
-            return implode('|', array_map(
-                function (ReflectionType $unionedType) use ($method, $parameter) {
-                    if ($unionedType instanceof ReflectionIntersectionType) {
-                        return '(' . $this->formatType($unionedType, $method, $parameter) . ')';
-                    }
-
-                    return $this->formatType($unionedType, $method, $parameter);
-                },
-                $type->getTypes()
-            ));
+            return implode('|', array_map(function (Reflection_Type $unioned_type) use ($method, $parameter) {
+                if ($unioned_type instanceof ReflectionIntersectionType) {
+                    return '(' . $this->format_type($unioned_type, $method, $parameter) . ')';
+                }
+                return $this->format_type($unioned_type, $method, $parameter);
+            }, $type->get_types()));
         }
-
         if ($type instanceof ReflectionIntersectionType) {
-            return implode('&', array_map(
-                function (ReflectionType $intersectedType) use ($method, $parameter) {
-                    return $this->formatType($intersectedType, $method, $parameter);
-                },
-                $type->getTypes()
-            ));
+            return implode('&', array_map(function (Reflection_Type $intersected_type) use ($method, $parameter) {
+                return $this->format_type($intersected_type, $method, $parameter);
+            }, $type->get_types()));
         }
-
         assert($type instanceof ReflectionNamedType);
-
-        $name      = $type->getName();
-        $nameLower = strtolower($name);
-
-        if ($nameLower === 'static') {
+        $name = $type->get_name();
+        $name_lower = strtolower($name);
+        if ($name_lower === 'static') {
             $name = 'static';
         }
-
-        if ($nameLower === 'self') {
-            $name = $method->getDeclaringClass()->getName();
+        if ($name_lower === 'self') {
+            $name = $method->get_declaring_class()->get_name();
         }
-
-        if ($nameLower === 'parent') {
-            $name = $method->getDeclaringClass()->getParentClass()->getName();
+        if ($name_lower === 'parent') {
+            $name = $method->get_declaring_class()->get_parent_class()->get_name();
         }
-
-        if (! $type->isBuiltin() && ! class_exists($name) && ! interface_exists($name) && $name !== 'static') {
+        if (!$type->is_builtin() && !class_exists($name) && !interface_exists($name) && $name !== 'static') {
             if ($parameter !== null) {
-                throw UnexpectedValueException::invalidParameterTypeHint(
-                    $method->getDeclaringClass()->getName(),
-                    $method->getName(),
-                    $parameter->getName()
-                );
+                throw UnexpectedValueException::invalid_parameter_type_hint($method->get_declaring_class()->get_name(), $method->get_name(), $parameter->get_name());
             }
-
-            throw UnexpectedValueException::invalidReturnTypeHint(
-                $method->getDeclaringClass()->getName(),
-                $method->getName()
-            );
+            throw UnexpectedValueException::invalid_return_type_hint($method->get_declaring_class()->get_name(), $method->get_name());
         }
-
-        if (! $type->isBuiltin() && $name !== 'static') {
+        if (!$type->is_builtin() && $name !== 'static') {
             $name = '\\' . $name;
         }
-
-        if (
-            $type->allowsNull()
-            && ! in_array($name, ['mixed', 'null'], true)
-        ) {
+        if ($type->allows_null() && !in_array($name, ['mixed', 'null'], true)) {
             return '?' . $name;
         }
-
         return $name;
     }
 }

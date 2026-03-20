@@ -1,17 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Doctrine\Common\Proxy;
 
 use function call_user_func;
-
 use Closure;
-
 use const DIRECTORY_SEPARATOR;
-
 use Doctrine\Common\Proxy\Exception\InvalidArgumentException;
-
 use function file_exists;
 use function is_callable;
 use function ltrim;
@@ -19,9 +14,7 @@ use function spl_autoload_register;
 use function str_replace;
 use function strlen;
 use function strpos;
-
 use function substr;
-
 /**
  * Special Autoloader for Proxy classes, which are not PSR-0 compliant.
  *
@@ -44,21 +37,17 @@ class Autoloader
      *
      * @throws InvalidArgumentException
      */
-    public static function resolveFile(string $proxyDir, $proxyNamespace, $className): string
+    public static function resolve_file(string $proxy_dir, $proxy_namespace, $class_name): string
     {
-        if (strpos($className, $proxyNamespace) !== 0) {
-            throw InvalidArgumentException::notProxyClass($className, $proxyNamespace);
+        if (strpos($class_name, $proxy_namespace) !== 0) {
+            throw InvalidArgumentException::not_proxy_class($class_name, $proxy_namespace);
         }
-
         // remove proxy namespace from class name
-        $classNameRelativeToProxyNamespace = substr($className, strlen($proxyNamespace));
-
+        $class_name_relative_to_proxy_namespace = substr($class_name, strlen($proxy_namespace));
         // remove namespace separators from remaining class name
-        $fileName = str_replace('\\', '', $classNameRelativeToProxyNamespace);
-
-        return $proxyDir . DIRECTORY_SEPARATOR . $fileName . '.php';
+        $file_name = str_replace('\\', '', $class_name_relative_to_proxy_namespace);
+        return $proxy_dir . DIRECTORY_SEPARATOR . $file_name . '.php';
     }
-
     /**
      * Registers and returns autoloader callback for the given proxy dir and namespace.
      *
@@ -70,34 +59,26 @@ class Autoloader
      *
      * @throws InvalidArgumentException
      */
-    public static function register($proxyDir, $proxyNamespace, $notFoundCallback = null)
+    public static function register($proxy_dir, $proxy_namespace, $not_found_callback = null)
     {
-        $proxyNamespace = ltrim($proxyNamespace, '\\');
-
-        if ($notFoundCallback !== null && ! is_callable($notFoundCallback)) {
-            throw InvalidArgumentException::invalidClassNotFoundCallback($notFoundCallback);
+        $proxy_namespace = ltrim($proxy_namespace, '\\');
+        if ($not_found_callback !== null && !is_callable($not_found_callback)) {
+            throw InvalidArgumentException::invalid_class_not_found_callback($not_found_callback);
         }
-
-        $autoloader = static function ($className) use ($proxyDir, $proxyNamespace, $notFoundCallback): void {
-            if ($proxyNamespace === '') {
+        $autoloader = static function ($class_name) use ($proxy_dir, $proxy_namespace, $not_found_callback): void {
+            if ($proxy_namespace === '') {
                 return;
             }
-
-            if (strpos($className, $proxyNamespace) !== 0) {
+            if (strpos($class_name, $proxy_namespace) !== 0) {
                 return;
             }
-
-            $file = Autoloader::resolveFile($proxyDir, $proxyNamespace, $className);
-
-            if ($notFoundCallback && ! file_exists($file)) {
-                call_user_func($notFoundCallback, $proxyDir, $proxyNamespace, $className);
+            $file = Autoloader::resolve_file($proxy_dir, $proxy_namespace, $class_name);
+            if ($not_found_callback && !file_exists($file)) {
+                call_user_func($not_found_callback, $proxy_dir, $proxy_namespace, $class_name);
             }
-
             require $file;
         };
-
         spl_autoload_register($autoloader);
-
         return $autoloader;
     }
 }

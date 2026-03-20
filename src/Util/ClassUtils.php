@@ -1,27 +1,21 @@
 <?php
 
-declare(strict_types=1);
-
+declare (strict_types=1);
 namespace Doctrine\Common\Util;
 
 use Doctrine\Persistence\Proxy;
-
 use function get_class;
-
 use function get_parent_class;
 use function ltrim;
-
 use ReflectionClass;
-
 use function rtrim;
 use function strrpos;
 use function substr;
-
 /**
  * Class and reflection related functionality for objects that
  * might or not be proxy objects at the moment.
  */
-class ClassUtils
+class Class_Utils
 {
     /**
      * Gets the real class name of a class name that could be a proxy.
@@ -34,18 +28,15 @@ class ClassUtils
      *
      * @template T of object
      */
-    public static function getRealClass($className)
+    public static function get_real_class($class_name)
     {
-        $pos = strrpos($className, '\\' . Proxy::MARKER . '\\');
-
+        $pos = strrpos($class_name, '\\' . Proxy::MARKER . '\\');
         if ($pos === false) {
             /** @psalm-var class-string<T> */
-            return $className;
+            return $class_name;
         }
-
-        return substr($className, $pos + Proxy::MARKER_LENGTH + 2);
+        return substr($class_name, $pos + Proxy::MARKER_LENGTH + 2);
     }
-
     /**
      * Gets the real class name of an object (even if its a proxy).
      *
@@ -57,11 +48,10 @@ class ClassUtils
      *
      * @template T of object
      */
-    public static function getClass($object)
+    public static function get_class($object)
     {
-        return self::getRealClass(get_class($object));
+        return self::get_real_class(get_class($object));
     }
-
     /**
      * Gets the real parent class name of a class or object.
      *
@@ -71,22 +61,20 @@ class ClassUtils
      * @return string
      * @psalm-return class-string
      */
-    public static function getParentClass($className)
+    public static function get_parent_class($class_name)
     {
-        return get_parent_class(self::getRealClass($className));
+        return get_parent_class(self::get_real_class($class_name));
     }
-
     /**
      * Creates a new reflection class.
      *
      * @param string $className
      * @psalm-param class-string $className
      */
-    public static function newReflectionClass($className): \ReflectionClass
+    public static function new_reflection_class($class_name): \ReflectionClass
     {
-        return new ReflectionClass(self::getRealClass($className));
+        return new ReflectionClass(self::get_real_class($class_name));
     }
-
     /**
      * Creates a new reflection object.
      *
@@ -94,11 +82,10 @@ class ClassUtils
      *
      * @return ReflectionClass
      */
-    public static function newReflectionObject($object)
+    public static function new_reflection_object($object)
     {
-        return self::newReflectionClass(self::getClass($object));
+        return self::new_reflection_class(self::get_class($object));
     }
-
     /**
      * Given a class name and a proxy namespace returns the proxy name.
      *
@@ -108,8 +95,8 @@ class ClassUtils
      *
      * @psalm-return class-string
      */
-    public static function generateProxyClassName($className, $proxyNamespace): string
+    public static function generate_proxy_class_name($class_name, $proxy_namespace): string
     {
-        return rtrim($proxyNamespace, '\\') . '\\' . Proxy::MARKER . '\\' . ltrim($className, '\\');
+        return rtrim($proxy_namespace, '\\') . '\\' . Proxy::MARKER . '\\' . ltrim($class_name, '\\');
     }
 }
