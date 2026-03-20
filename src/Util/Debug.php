@@ -45,16 +45,24 @@ final class Debug
     /**
      * Prints a dump of the public, protected and private properties of $var.
      *
+     * Output is captured from var_dump(), optionally stripped of HTML tags,
+     * and optionally echoed before being returned as a string.
+     * Uses xdebug.var_display_max_depth when the xdebug extension is loaded.
+     *
      * @link https://xdebug.org/
      *
-     * @param mixed $var       The variable to dump.
-     * @param int   $maxDepth  The maximum nesting level for object properties.
-     * @param bool  $stripTags Whether output should strip HTML tags.
-     * @param bool  $echo      Send the dumped value to the output buffer
+     * @deprecated The Debug class is deprecated; use symfony/var-dumper instead.
      *
-     * @return string
+     * @param mixed $var       The variable to dump.
+     * @param int   $max_depth The maximum nesting level for object properties (default 2).
+     * @param bool  $strip_tags Whether to strip HTML tags from the output (default true).
+     * @param bool  $echo      Whether to echo the dump to the output buffer (default true).
+     *
+     * @return string The string representation of the dump.
+     *
+     * @since 2.0
      */
-    public static function dump($var, $max_depth = 2, $strip_tags = true, $echo = true)
+    public static function dump(mixed $var, int $max_depth = 2, bool $strip_tags = true, bool $echo = true): string
     {
         $html = ini_get('html_errors');
         ini_set('html_errors', 'on');
@@ -74,12 +82,25 @@ final class Debug
         return $dump_text;
     }
     /**
-     * @param mixed $var
-     * @param int   $maxDepth
+     * Recursively exports a value into a serialisation-safe representation.
      *
-     * @return mixed
+     * Objects become stdClass instances with a __CLASS__ property.
+     * Arrays are exported element-by-element up to $max_depth.
+     * When $max_depth reaches 0, objects are replaced by their class name string
+     * and arrays by "Array(n)".
+     *
+     * @deprecated The Debug class is deprecated; use symfony/var-dumper instead.
+     *
+     * @param mixed $var       The value to export.
+     * @param int   $max_depth Maximum recursion depth before collapsing objects/arrays.
+     *
+     * @return mixed The exported representation, suitable for var_dump().
+     *
+     * @complexity O(n) where n is the total number of properties across all nested objects.
+     *
+     * @since 2.0
      */
-    public static function export($var, $max_depth)
+    public static function export(mixed $var, int $max_depth): mixed
     {
         $return = null;
         $is_obj = is_object($var);
@@ -117,13 +138,24 @@ final class Debug
         return self::fill_return_with_class_attributes($var, $return, $max_depth);
     }
     /**
-     * Fill the $return variable with class attributes
-     * Based on obj2array function from {@see https://secure.php.net/manual/en/function.get-object-vars.php#47075}
+     * Populates $return with the exported properties of $var.
      *
-     * @param object $var
-     * @param int    $maxDepth
+     * Uses array-cast to access private and protected properties.
+     * Property visibility is encoded in the key name: private keys are prefixed
+     * with NUL + class-name + NUL, protected keys with NUL * NUL.
+     *
+     * Based on the obj2array technique from:
+     * {@see https://secure.php.net/manual/en/function.get-object-vars.php#47075}
+     *
+     * @param object   $var      The object whose properties are exported.
+     * @param stdClass $return   The target stdClass to populate.
+     * @param int      $max_depth Remaining recursion depth.
+     *
+     * @return stdClass The populated $return object.
+     *
+     * @since 2.0
      */
-    private static function fill_return_with_class_attributes($var, stdClass $return, $max_depth): stdClass
+    private static function fill_return_with_class_attributes(object $var, stdClass $return, int $max_depth): stdClass
     {
         $clone = (array) $var;
         foreach (array_keys($clone) as $key) {
@@ -137,11 +169,20 @@ final class Debug
         return $return;
     }
     /**
-     * Returns a string representation of an object.
+     * Returns a human-readable string representation of an object.
      *
-     * @param object $obj
+     * If the object implements __toString() that value is returned.
+     * Otherwise the format is "ClassName@<spl_object_hash>".
+     *
+     * @deprecated The Debug class is deprecated; use symfony/var-dumper instead.
+     *
+     * @param object $obj The object to represent as a string.
+     *
+     * @return string A string identifying the object.
+     *
+     * @since 2.1
      */
-    public static function to_string($obj): string
+    public static function to_string(object $obj): string
     {
         return method_exists($obj, '__toString') ? (string) $obj : get_class($obj) . '@' . spl_object_hash($obj);
     }
